@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inscription — Lunchboxd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0f0c; --surface: #161712; --surface2: #1e1f1a;
+      --border: #2a2b25; --accent: #c8f542; --accent2: #f5a623;
+      --text: #e8e6dc; --muted: #7a7a6e; --red: #e84545; --green: #4caf87;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-weight: 300;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1000; opacity: 0.5;
+    }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border);
+      background: rgba(14,15,12,0.92); backdrop-filter: blur(12px); z-index: 100;
+    }
+    .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; color: var(--accent); text-decoration: none; }
+    .logo span { color: var(--text); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-actions { display: flex; gap: 0.75rem; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text); padding: 0.45rem 1.1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c; padding: 0.45rem 1.1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-primary:hover { background: #d9ff55; }
+
+    .page-center {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 3rem 1.5rem; position: relative;
+    }
+    .page-center::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(200,245,66,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 2.5rem 2.8rem;
+      width: 100%; max-width: 440px; position: relative;
+      animation: fadeUp 0.5s ease both;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .auth-logo { text-align: center; font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--accent); margin-bottom: 0.3rem; }
+    .auth-logo span { color: var(--text); }
+    .auth-tagline { text-align: center; font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2rem; }
+
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .auth-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.8rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .form-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+    .form-input {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.7rem 0.9rem;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--muted); }
+    .form-hint { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 0.15rem; }
+    .form-input.valid   { border-color: #4caf87; }
+    .form-input.invalid { border-color: var(--red); }
+    .field-msg { font-size: 0.68rem; font-family: 'DM Mono', monospace; margin-top: 0.15rem; display: none; }
+    .field-msg.show { display: block; }
+    .field-msg.ok  { color: #4caf87; }
+    .field-msg.err { color: var(--red); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* AVATAR PICKER */
+    .avatar-picker { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem; }
+    .avatar-opt {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--surface2); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; cursor: pointer; transition: all 0.15s;
+      user-select: none;
+    }
+    .avatar-opt:hover { border-color: var(--muted); transform: scale(1.1); }
+    .avatar-opt.selected { border-color: var(--accent); background: rgba(200,245,66,0.1); transform: scale(1.1); }
+
+    .error-msg {
+      background: rgba(232,69,69,0.1); border: 1px solid rgba(232,69,69,0.25);
+      color: var(--red); font-size: 0.78rem; padding: 0.6rem 0.9rem;
+      border-radius: 4px; margin-bottom: 1rem; display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .btn-submit {
+      width: 100%; padding: 0.85rem;
+      background: var(--accent); border: none; border-radius: 4px;
+      color: #0e0f0c; font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; margin-top: 0.5rem;
+    }
+    .btn-submit:hover { background: #d9ff55; transform: translateY(-1px); }
+
+    .auth-footer { text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted); }
+    .auth-footer a { color: var(--accent); text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .terms { font-size: 0.68rem; color: var(--muted); text-align: center; margin-top: 1rem; line-height: 1.5; }
+
+    footer { border-top: 1px solid var(--border); padding: 1.5rem 2.5rem; background: var(--surface); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+    .footer-logo span { color: var(--muted); }
+    .footer-copy { color: var(--border); font-size: 0.7rem; font-family: 'DM Mono', monospace; }
+
+    /* ── RESPONSIVE MOBILE ── */
+
+    /* HAMBURGER MENU */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.5rem 0.6rem; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.2s; }
+    .mobile-menu {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(14,15,12,0.97); z-index: 999;
+      flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a, .mobile-menu button {
+      color: var(--text); text-decoration: none; font-size: 1.4rem;
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      letter-spacing: -0.02em; transition: color 0.2s;
+      background: none; border: none; cursor: pointer;
+    }
+    .mobile-menu a:hover, .mobile-menu button:hover { color: var(--accent); }
+    .mobile-menu-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none; color: var(--muted); font-size: 1.5rem;
+      cursor: pointer; padding: 0.4rem;
+    }
+    .mobile-menu-divider { width: 60px; height: 1px; background: var(--border); }
+    .mobile-menu-auth { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; width: 80%; }
+    .mobile-btn-ghost {
+      display: block; width: 100%; text-align: center;
+      background: none; border: 1px solid var(--border); color: var(--text);
+      padding: 0.7rem 1.5rem; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .mobile-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .mobile-btn-primary {
+      display: block; width: 100%; text-align: center;
+      background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c;
+      padding: 0.7rem 1.5rem; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .mobile-btn-primary:hover { background: #d9ff55; }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE MOBILE
+    ═══════════════════════════════════════ */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .mobile-menu { display: none !important; }
+      .auth-layout { flex-direction: column; min-height: 100vh; }
+      .auth-brand { display: none; }
+      .auth-form-side {
+        width: 100%; min-height: 100vh;
+        padding: 3rem 1.5rem 2rem;
+        justify-content: center;
+      }
+      .auth-box { width: 100%; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🥡 <span>Lunchboxd</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Repas</a></li>
+      <li><a href="critiques.html">Critiques</a></li>
+      <li><a href="classement.html">Classement</a></li>
+      <li><a href="apropos.html">À propos</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a class="btn-ghost" href="connexion.html">Connexion</a>
+      <a class="btn-primary" href="inscription.html">Créer un compte</a>
+    </div>
+        
+      <button class="hamburger" onclick="openMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+    <a href="index.html" onclick="closeMobileMenu()">Repas</a>
+    <a href="critiques.html" onclick="closeMobileMenu()">Critiques</a>
+    <a href="classement.html" onclick="closeMobileMenu()">Classement</a>
+    <a href="apropos.html" onclick="closeMobileMenu()">À propos</a>
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-auth" id="mobileMenuAuth">
+      <a href="connexion.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">Connexion</a>
+      <a href="inscription.html" onclick="closeMobileMenu()" class="mobile-btn-primary">Créer un compte</a>
+    </div>
+  </div>
+
+
+  <div class="page-center">
+    <div class="auth-card">
+      <div class="auth-logo">🥡 <span>Lunchboxd</span></div>
+      <div class="auth-tagline">Lycée Sainte-Geneviève</div>
+
+      <h1 class="auth-title">Rejoindre Lunchboxd</h1>
+      <p class="auth-sub">Gratuit, rapide, et la cantine mérite ta voix.</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <!-- Avatar -->
+      <div class="form-group">
+        <label class="form-label">Choisis ton avatar</label>
+        <div class="avatar-picker" id="avatarPicker">
+          <div class="avatar-opt selected" data-avatar="🧔" onclick="selectAvatar(this)">🧔</div>
+          <div class="avatar-opt" data-avatar="🧑‍💻" onclick="selectAvatar(this)">🧑‍💻</div>
+          <div class="avatar-opt" data-avatar="👩‍🎓" onclick="selectAvatar(this)">👩‍🎓</div>
+          <div class="avatar-opt" data-avatar="👨‍🍳" onclick="selectAvatar(this)">👨‍🍳</div>
+          <div class="avatar-opt" data-avatar="🧒" onclick="selectAvatar(this)">🧒</div>
+          <div class="avatar-opt" data-avatar="👩" onclick="selectAvatar(this)">👩</div>
+          <div class="avatar-opt" data-avatar="👦" onclick="selectAvatar(this)">👦</div>
+          <div class="avatar-opt" data-avatar="👧" onclick="selectAvatar(this)">👧</div>
+          <div class="avatar-opt" data-avatar="🙋" onclick="selectAvatar(this)">🙋</div>
+          <div class="avatar-opt" data-avatar="🧑" onclick="selectAvatar(this)">🧑</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="pseudo">Pseudo</label>
+        <input class="form-input" type="text" id="pseudo" placeholder="ton_pseudo" autocomplete="username" maxlength="20" oninput="validatePseudo()" />
+        <span class="field-msg" id="msgPseudo"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-input" type="email" id="email" placeholder="prenom@sainte-genevieve.fr" autocomplete="email" oninput="validateEmail()" />
+        <span class="field-msg" id="msgEmail"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Mot de passe</label>
+        <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="new-password" oninput="validatePassword()" />
+        <span class="field-msg" id="msgPassword"></span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirm">Confirmer le mot de passe</label>
+        <input class="form-input" type="password" id="confirm" placeholder="••••••••" autocomplete="new-password" oninput="validateConfirm()" />
+        <span class="field-msg" id="msgConfirm"></span>
+      </div>
+
+      <button class="btn-submit" onclick="handleRegister()">Créer mon compte →</button>
+
+      <p class="terms">En créant un compte, tu acceptes de noter les repas honnêtement et de ne pas mettre 5 étoiles au colin pané.</p>
+
+      <div class="auth-footer">
+        Déjà un compte ? <a href="connexion.html">Se connecter</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <a class="footer-logo" href="index.html">🥡 <span>Lunchboxd</span></a>
+      <div class="footer-copy">© 2026 Lunchboxd. Fait avec 🥄 — Lycée Sainte-Geneviève, 70 rue d'Assas, Paris 6e.</div>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) window.location.href = 'index.html';
+
+    let selectedAvatar = '🧔';
+
+    function selectAvatar(el) {
+      document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedAvatar = el.dataset.avatar;
+    }
+
+    function setFieldState(inputId, msgId, ok, message) {
+      const input = document.getElementById(inputId);
+      const msg = document.getElementById(msgId);
+      input.classList.toggle('valid', ok);
+      input.classList.toggle('invalid', !ok && message !== '');
+      msg.textContent = message;
+      msg.className = 'field-msg show ' + (ok ? 'ok' : 'err');
+      if (message === '') { msg.classList.remove('show'); input.classList.remove('valid','invalid'); }
+    }
+
+    function validatePseudo() {
+      const v = document.getElementById('pseudo').value.trim();
+      if (v.length === 0) return setFieldState('pseudo','msgPseudo',false,'');
+      if (v.length < 3)   return setFieldState('pseudo','msgPseudo',false,'❌ Au moins 3 caractères');
+      if (v.length > 20)  return setFieldState('pseudo','msgPseudo',false,'❌ Maximum 20 caractères');
+      setFieldState('pseudo','msgPseudo',true,'✓ Pseudo valide');
+    }
+
+    function validateEmail() {
+      const v = document.getElementById('email').value.trim();
+      if (v.length === 0) return setFieldState('email','msgEmail',false,'');
+      if (!v.includes('@') || !v.includes('.')) return setFieldState('email','msgEmail',false,'❌ Adresse email invalide (doit contenir @ et .)');
+      setFieldState('email','msgEmail',true,'✓ Email valide');
+    }
+
+    function validatePassword() {
+      const v = document.getElementById('password').value;
+      if (v.length === 0) return setFieldState('password','msgPassword',false,'');
+      if (v.length < 6)   return setFieldState('password','msgPassword',false,'❌ Au moins 6 caractères (' + v.length + '/6)');
+      setFieldState('password','msgPassword',true,'✓ Mot de passe valide');
+      validateConfirm(); // re-check confirm if already filled
+    }
+
+    function validateConfirm() {
+      const pw = document.getElementById('password').value;
+      const v  = document.getElementById('confirm').value;
+      if (v.length === 0) return setFieldState('confirm','msgConfirm',false,'');
+      if (v !== pw) return setFieldState('confirm','msgConfirm',false,'❌ Les mots de passe ne correspondent pas');
+      setFieldState('confirm','msgConfirm',true,'✓ Mots de passe identiques');
+    }
+
+    function isFormValid() {
+      const pseudo   = document.getElementById('pseudo').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm').value;
+      return pseudo.length >= 3 && pseudo.length <= 20 &&
+             email.includes('@') && email.includes('.') &&
+             password.length >= 6 && password === confirm;
+    }
+
+    async function handleRegister() {
+      const pseudo   = document.getElementById('pseudo').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm').value;
+      const err = document.getElementById('errorMsg');
+      const btn = document.querySelector('.btn-submit');
+
+      // Déclenche toutes les validations pour montrer les erreurs
+      validatePseudo(); validateEmail(); validatePassword(); validateConfirm();
+
+      if (!isFormValid()) {
+        err.textContent = 'Corrige les erreurs ci-dessus avant de continuer.';
+        err.classList.add('show');
+        return;
+      }
+
+      btn.textContent = 'Création du compte…';
+      btn.disabled = true;
+      err.classList.remove('show');
+
+      const result = await Auth.register(pseudo, email, password);
+      if (!result.ok) {
+        err.textContent = result.error;
+        err.classList.add('show');
+        btn.textContent = 'Créer mon compte →';
+        btn.disabled = false;
+      } else {
+        const session = Auth.getSession();
+        if (session) {
+          session.avatar = selectedAvatar;
+          localStorage.setItem('lb_session', JSON.stringify(session));
+        }
+        btn.textContent = '✓ Compte créé ! Bienvenue…';
+        btn.style.background = '#4caf87';
+        setTimeout(() => { window.location.href = 'profil.html'; }, 900);
+      }
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+  </script>
+
+  <script>
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    // Update mobile auth section based on login state
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof Auth !== 'undefined') {
+        const session = Auth.getSession();
+        const authEl = document.getElementById('mobileMenuAuth');
+        if (authEl && session) {
+          authEl.innerHTML =
+            '<a href="profil.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">' + session.avatar + ' ' + session.pseudo + '</a>' +
+            '<button onclick="Auth.logout(); window.location.reload();" class="mobile-btn-ghost" style="cursor:pointer;">Déconnexion</button>';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
