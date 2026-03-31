@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lunchboxd — Note ta cantine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0f0c;
+      --surface: #161712;
+      --surface2: #1e1f1a;
+      --border: #2a2b25;
+      --accent: #c8f542;
+      --accent2: #f5a623;
+      --accent3: #e84545;
+      --text: #e8e6dc;
+      --muted: #7a7a6e;
+      --card-bg: #1a1b16;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.5;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(14,15,12,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .logo span { color: var(--text); }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 1.1rem;
+      border-radius: 3px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-primary {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: #0e0f0c;
+      padding: 0.45rem 1.1rem;
+      border-radius: 3px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover { background: #d9ff55; }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      padding: 6rem 2.5rem 5rem;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 60% 50%, rgba(200,245,66,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, rgba(245,166,35,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(200,245,66,0.1);
+      border: 1px solid rgba(200,245,66,0.25);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      max-width: 440px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-cta { display: flex; gap: 1rem; align-items: center; }
+
+    .btn-big {
+      background: var(--accent);
+      color: #0e0f0c;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 3px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-big:hover { background: #d9ff55; transform: translateY(-1px); }
+
+    .hero-stat { color: var(--muted); font-size: 0.82rem; }
+    .hero-stat strong { color: var(--accent2); }
+
+    .hero-visual { position: relative; height: 380px; }
+    .meal-card-preview {
+      position: absolute;
+      width: 200px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      transition: transform 0.3s;
+    }
+    .meal-card-preview:hover { transform: translateY(-4px) !important; }
+    .meal-card-preview:nth-child(1) { top: 20px; left: 30px; transform: rotate(-4deg); z-index: 3; }
+    .meal-card-preview:nth-child(2) { top: 40px; left: 140px; transform: rotate(2deg); z-index: 4; }
+    .meal-card-preview:nth-child(3) { top: 160px; left: 80px; transform: rotate(-1deg); z-index: 5; }
+    .meal-card-preview:nth-child(4) { top: 80px; left: 280px; transform: rotate(3deg); z-index: 2; }
+
+    .card-img {
+      width: 100%;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+    .card-img.lasagne { background: linear-gradient(135deg, #2a1810, #3d2518); }
+    .card-img.pizza { background: linear-gradient(135deg, #1e1010, #2e1a0e); }
+    .card-img.salade { background: linear-gradient(135deg, #0d1f0d, #162616); }
+    .card-img.steak { background: linear-gradient(135deg, #1f1010, #2e1414); }
+
+    .card-info { padding: 0.7rem 0.8rem; }
+    .card-info h4 { font-size: 0.82rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .card-info .stars { color: var(--accent2); font-size: 0.7rem; letter-spacing: 0.05em; }
+    .card-info .reviewer { color: var(--muted); font-size: 0.68rem; font-family: 'DM Mono', monospace; margin-top: 0.2rem; }
+
+    /* STATS BAR */
+    .stats-bar {
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2.5rem;
+      background: var(--surface);
+    }
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+    }
+    .stat-item { display: flex; align-items: baseline; gap: 0.5rem; flex-shrink: 0; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .stat-label { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+    .stat-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+    /* SECTIONS */
+    .section { max-width: 1200px; margin: 0 auto; padding: 3.5rem 2.5rem; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.9rem;
+    }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; }
+    .section-title span { color: var(--accent); font-style: italic; }
+    .section-link {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .section-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* MEAL GRID */
+    .meal-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+
+    .meal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+    }
+    .meal-card:hover {
+      border-color: rgba(200,245,66,0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+
+    .meal-thumb {
+      width: 100%;
+      aspect-ratio: 3/2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      position: relative;
+    }
+    .t1 { background: linear-gradient(135deg, #241510, #3a2215); }
+    .t2 { background: linear-gradient(135deg, #0e1a0e, #1a2e1a); }
+    .t3 { background: linear-gradient(135deg, #1a1010, #2e1818); }
+    .t4 { background: linear-gradient(135deg, #10101a, #18182e); }
+    .t5 { background: linear-gradient(135deg, #1a1510, #2e2518); }
+    .t6 { background: linear-gradient(135deg, #1a0e0e, #2e1a1a); }
+    .t7 { background: linear-gradient(135deg, #0e1a18, #1a2e2a); }
+    .t8 { background: linear-gradient(135deg, #1a1a0e, #2e2e1a); }
+    .t9 { background: linear-gradient(135deg, #18100e, #2e1a18); }
+    .t10 { background: linear-gradient(135deg, #0e180e, #1a2e1a); }
+
+    .meal-badge {
+      position: absolute;
+      bottom: 0.4rem;
+      right: 0.4rem;
+      background: rgba(14,15,12,0.85);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.15rem 0.4rem;
+      font-size: 0.62rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--accent2);
+    }
+
+    .meal-meta { padding: 0.65rem 0.7rem 0.7rem; }
+    .meal-name { font-size: 0.8rem; font-weight: 500; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .meal-footer { display: flex; align-items: center; justify-content: space-between; }
+    .stars-sm { color: var(--accent2); font-size: 0.6rem; }
+    .review-count { color: var(--muted); font-size: 0.62rem; font-family: 'DM Mono', monospace; }
+
+    /* FEED */
+    .feed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    .feed-list { display: flex; flex-direction: column; }
+
+    .feed-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+    .feed-item:last-child { border-bottom: none; }
+
+    .feed-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .av1 { background: #1a2e1a; } .av2 { background: #2e1a1a; }
+    .av3 { background: #1a1a2e; } .av4 { background: #2e2a1a; } .av5 { background: #1a2e2e; }
+
+    .feed-content { flex: 1; }
+    .feed-top { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; flex-wrap: wrap; }
+    .feed-user { font-size: 0.82rem; font-weight: 500; }
+    .feed-action { font-size: 0.78rem; color: var(--muted); }
+    .feed-meal { font-size: 0.82rem; color: var(--accent); font-style: italic; }
+    .feed-stars { color: var(--accent2); font-size: 0.65rem; }
+    .feed-comment { font-size: 0.78rem; color: var(--muted); line-height: 1.55; font-style: italic; }
+    .feed-time { font-size: 0.65rem; color: var(--border); font-family: 'DM Mono', monospace; margin-top: 0.35rem; }
+
+    /* TOP LIST */
+    .top-list { display: flex; flex-direction: column; }
+    .top-item {
+      display: flex; gap: 1rem; align-items: center;
+      padding: 0.85rem 0; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .top-item:last-child { border-bottom: none; }
+    .top-item:hover .top-name { color: var(--accent); }
+    .top-rank { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--border); width: 26px; text-align: right; flex-shrink: 0; }
+    .top-emoji { font-size: 1.8rem; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border-radius: 4px; flex-shrink: 0; }
+    .top-info { flex: 1; }
+    .top-name { font-size: 0.85rem; font-weight: 500; margin-bottom: 0.2rem; transition: color 0.2s; }
+    .top-meta { font-size: 0.7rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .top-score { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+
+    /* CTA */
+    .review-cta { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .review-cta-inner {
+      max-width: 1200px; margin: 0 auto; padding: 3rem 2.5rem;
+      display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center;
+    }
+    .cta-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+    .cta-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.6rem; }
+    .cta-sub { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+    .today-meal {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1.5rem 2rem; text-align: center; min-width: 220px;
+    }
+    .today-label { font-size: 0.65rem; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .today-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+    .today-name { font-size: 0.9rem; font-weight: 500; margin-bottom: 1rem; }
+    .rate-btn {
+      width: 100%; background: var(--accent); color: #0e0f0c; border: none;
+      padding: 0.6rem 1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .rate-btn:hover { background: #d9ff55; }
+
+    /* REVIEWERS */
+    .reviewers-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .reviewer-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 5px;
+      padding: 1.2rem; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .reviewer-card:hover { border-color: rgba(200,245,66,0.25); transform: translateY(-2px); }
+    .reviewer-avatar {
+      font-size: 2rem; width: 54px; height: 54px; border-radius: 50%;
+      background: var(--surface2); display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.7rem; border: 1px solid var(--border);
+    }
+    .reviewer-name { font-size: 0.85rem; font-weight: 500; margin-bottom: 0.2rem; }
+    .reviewer-handle { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 0.6rem; }
+    .reviewer-stats { display: flex; justify-content: center; gap: 1rem; }
+    .r-stat { text-align: center; }
+    .r-stat strong { display: block; font-size: 0.9rem; color: var(--accent); font-family: 'Playfair Display', serif; }
+    .r-stat span { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; background: var(--surface); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.75rem; font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--border); font-size: 0.72rem; font-family: 'DM Mono', monospace; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-tag { animation: fadeUp 0.5s ease both; }
+    .hero h1 { animation: fadeUp 0.5s 0.1s ease both; }
+    .hero p { animation: fadeUp 0.5s 0.2s ease both; }
+    .hero-cta { animation: fadeUp 0.5s 0.3s ease both; }
+    .hero-visual { animation: fadeUp 0.6s 0.2s ease both; }
+
+    /* ── RESPONSIVE MOBILE ── */
+
+    /* HAMBURGER MENU */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.5rem 0.6rem; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.2s; }
+    .mobile-menu {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(14,15,12,0.97); z-index: 999;
+      flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a, .mobile-menu button {
+      color: var(--text); text-decoration: none; font-size: 1.4rem;
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      letter-spacing: -0.02em; transition: color 0.2s;
+      background: none; border: none; cursor: pointer;
+    }
+    .mobile-menu a:hover, .mobile-menu button:hover { color: var(--accent); }
+    .mobile-menu-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none; color: var(--muted); font-size: 1.5rem;
+      cursor: pointer; padding: 0.4rem;
+    }
+    .mobile-menu-divider { width: 60px; height: 1px; background: var(--border); }
+    .mobile-menu-auth { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; width: 80%; }
+    .mobile-btn-ghost {
+      display: block; width: 100%; text-align: center;
+      background: none; border: 1px solid var(--border); color: var(--text);
+      padding: 0.7rem 1.5rem; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .mobile-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .mobile-btn-primary {
+      display: block; width: 100%; text-align: center;
+      background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c;
+      padding: 0.7rem 1.5rem; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .mobile-btn-primary:hover { background: #d9ff55; }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE MOBILE — max 768px
+    ═══════════════════════════════════════ */
+    @media (max-width: 768px) {
+      /* NAV */
+      nav { padding: 0.9rem 1rem; }
+      .nav-links { display: none; }
+      .nav-actions { display: none; }
+      .hamburger { display: flex !important; }
+
+      /* HERO */
+      .hero { padding: 2.5rem 1rem 2rem; }
+      .hero-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+      .hero h1 { font-size: 1.9rem; line-height: 1.15; }
+      .hero p { font-size: 0.88rem; }
+      .hero-cta { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+      .hero-stats { flex-wrap: wrap; gap: 0.8rem; }
+      .hero-visual { display: none; }
+
+      /* SECTIONS */
+      .section { padding: 2rem 1rem; }
+      .section-header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+
+      /* MEAL GRID */
+      .meal-grid { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+      .meal-card { padding: 0.8rem; }
+
+      /* STATS STRIP */
+      /* STATS BAR */
+      .stats-bar { padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .stats-inner { gap: 0; min-width: max-content; padding: 0; }
+      .stat-item { flex-direction: column; align-items: center; gap: 0.2rem; padding: 1rem 1.2rem; border-right: 1px solid var(--border); }
+      .stat-item:last-child { border-right: none; }
+      .stat-num { font-size: 1.2rem; }
+      .stat-label { font-size: 0.6rem; text-align: center; }
+      .stat-divider { display: none; }
+
+      /* FEED */
+      .feed-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+
+      /* CTA */
+      .review-cta-inner { grid-template-columns: 1fr; gap: 1rem; text-align: center; padding: 2rem 1rem; }
+
+      /* REVIEWERS */
+      .reviewers-grid { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+
+      /* FOOTER */
+      footer { padding: 1.5rem 1rem; }
+      .footer-inner { flex-direction: column; gap: 0.8rem; text-align: center; }
+      .footer-copy { font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🥡 <span>Lunchboxd</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Repas</a></li>
+      <li><a href="critiques.html">Critiques</a></li>
+      <li><a href="classement.html">Classement</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="apropos.html">À propos</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions">
+      <a class="btn-ghost" href="connexion.html">Connexion</a>
+      <a class="btn-primary" href="inscription.html">Créer un compte</a>
+    </div>
+        
+      <button class="hamburger" onclick="openMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+    <a href="index.html" onclick="closeMobileMenu()">Repas</a>
+    <a href="critiques.html" onclick="closeMobileMenu()">Critiques</a>
+    <a href="classement.html" onclick="closeMobileMenu()">Classement</a>
+    <a href="menu.html" onclick="closeMobileMenu()">Menu</a>
+    <a href="apropos.html" onclick="closeMobileMenu()">À propos</a>
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-auth" id="mobileMenuAuth">
+      <a href="connexion.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">Connexion</a>
+      <a href="inscription.html" onclick="closeMobileMenu()" class="mobile-btn-primary">Créer un compte</a>
+    </div>
+  </div>
+
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-tag">🏫 Lycée Sainte-Geneviève — Paris 6e</div>
+        <h1>Note les repas<br/>de ta <em>cantine</em><br/>comme un critique.</h1>
+        <p>Chronique chaque plat, partage tes avis, découvre les chefs-d'œuvre (et les catastrophes) de ta cantine. Parce que même la lasagne du jeudi mérite une critique.</p>
+        <div class="hero-cta">
+          <button class="btn-big" onclick="window.location.href = (typeof Auth !== 'undefined' && Auth.isLoggedIn()) ? 'profil.html' : 'connexion.html'">Commencer à noter →</button>
+          <div class="hero-stat">Déjà <strong id="heroStatRepas">…</strong> repas notés cette année</div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="meal-card-preview">
+          <div class="card-img lasagne">🫕</div>
+          <div class="card-info">
+            <h4>Lasagne bolognaise</h4>
+            <div class="stars">★★★★☆</div>
+            <div class="reviewer">@mathieu_r</div>
+          </div>
+        </div>
+        <div class="meal-card-preview">
+          <div class="card-img salade">🥗</div>
+          <div class="card-info">
+            <h4>Salade niçoise</h4>
+            <div class="stars">★★★☆☆</div>
+            <div class="reviewer">@chloe_fft</div>
+          </div>
+        </div>
+        <div class="meal-card-preview">
+          <div class="card-img steak">🥩</div>
+          <div class="card-info">
+            <h4>Steak haché frites</h4>
+            <div class="stars">★★★★★</div>
+            <div class="reviewer">@lucas_bd</div>
+          </div>
+        </div>
+        <div class="meal-card-preview">
+          <div class="card-img pizza">🍕</div>
+          <div class="card-info">
+            <h4>Pizza margherita</h4>
+            <div class="stars">★★☆☆☆</div>
+            <div class="reviewer">@emma_v</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <div class="stat-num" id="statRepas">—</div>
+        <div class="stat-label">Repas notés</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num" id="statCritiques">—</div>
+        <div class="stat-label">Critiques écrites</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num" id="statMembres">—</div>
+        <div class="stat-label">Membres actifs</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num" id="statMoyenne">—</div>
+        <div class="stat-label">Note moyenne /5</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num" id="statMeilleur">—</div>
+        <div class="stat-label">Meilleur plat</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Repas <span>récents</span></div>
+      <a href="#" class="section-link">Tous les repas →</a>
+    </div>
+    <div class="meal-grid">
+      <div class="meal-card">
+        <div class="meal-thumb t1"><span>🫕</span><div class="meal-badge">4.2 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Lasagne bolognaise</div>
+          <div class="meal-footer"><div class="stars-sm">★★★★☆</div><div class="review-count">12 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t2"><span>🥗</span><div class="meal-badge">3.0 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Salade niçoise</div>
+          <div class="meal-footer"><div class="stars-sm">★★★☆☆</div><div class="review-count">7 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t3"><span>🍖</span><div class="meal-badge">4.8 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Steak haché frites</div>
+          <div class="meal-footer"><div class="stars-sm">★★★★★</div><div class="review-count">31 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t4"><span>🐟</span><div class="meal-badge">2.4 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Poisson pané purée</div>
+          <div class="meal-footer"><div class="stars-sm">★★☆☆☆</div><div class="review-count">18 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t5"><span>🍛</span><div class="meal-badge">3.7 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Poulet rôti riz</div>
+          <div class="meal-footer"><div class="stars-sm">★★★★☆</div><div class="review-count">22 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t6"><span>🌮</span><div class="meal-badge">3.5 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Wrap thon maïs</div>
+          <div class="meal-footer"><div class="stars-sm">★★★½☆</div><div class="review-count">9 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t7"><span>🍜</span><div class="meal-badge">4.0 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Gratin dauphinois</div>
+          <div class="meal-footer"><div class="stars-sm">★★★★☆</div><div class="review-count">14 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t8"><span>🫔</span><div class="meal-badge">1.9 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Quiche lorraine</div>
+          <div class="meal-footer"><div class="stars-sm">★★☆☆☆</div><div class="review-count">5 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t9"><span>🍝</span><div class="meal-badge">3.9 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Spaghetti carbonara</div>
+          <div class="meal-footer"><div class="stars-sm">★★★★☆</div><div class="review-count">19 avis</div></div>
+        </div>
+      </div>
+      <div class="meal-card">
+        <div class="meal-thumb t10"><span>🥦</span><div class="meal-badge">2.1 ★</div></div>
+        <div class="meal-meta">
+          <div class="meal-name">Burger végétarien</div>
+          <div class="meal-footer"><div class="stars-sm">★★☆☆☆</div><div class="review-count">11 avis</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top: 0;">
+    <div class="feed-grid">
+      <div>
+        <div class="section-header">
+          <div class="section-title">Activité <span>récente</span></div>
+          <a href="#" class="section-link">Tout voir →</a>
+        </div>
+        <div class="feed-list">
+          <div class="feed-item">
+            <div class="feed-avatar av1">🧑</div>
+            <div class="feed-content">
+              <div class="feed-top">
+                <span class="feed-user">mathieu_r</span>
+                <span class="feed-action">a noté</span>
+                <span class="feed-meal">Lasagne bolognaise</span>
+                <span class="feed-stars">★★★★☆</span>
+              </div>
+              <div class="feed-comment">« Un classique du jeudi. La béchamel était généreuse, même si la viande manquait un peu de caractère. »</div>
+              <div class="feed-time">il y a 23 min</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-avatar av2">👩</div>
+            <div class="feed-content">
+              <div class="feed-top">
+                <span class="feed-user">chloe_fft</span>
+                <span class="feed-action">a noté</span>
+                <span class="feed-meal">Poisson pané purée</span>
+                <span class="feed-stars">★★☆☆☆</span>
+              </div>
+              <div class="feed-comment">« La purée était en brique. Le poisson avait la texture du carton. Pas convaincu. »</div>
+              <div class="feed-time">il y a 1h</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-avatar av3">🧒</div>
+            <div class="feed-content">
+              <div class="feed-top">
+                <span class="feed-user">lucas_bd</span>
+                <span class="feed-action">a noté</span>
+                <span class="feed-meal">Steak haché frites</span>
+                <span class="feed-stars">★★★★★</span>
+              </div>
+              <div class="feed-comment">« Chef-d'œuvre absolu. Les frites croustillantes, le steak saignant. Ce jour-là, la cantine était un restaurant étoilé. »</div>
+              <div class="feed-time">il y a 2h</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-avatar av4">👦</div>
+            <div class="feed-content">
+              <div class="feed-top">
+                <span class="feed-user">theo_m</span>
+                <span class="feed-action">a noté</span>
+                <span class="feed-meal">Gratin dauphinois</span>
+                <span class="feed-stars">★★★★☆</span>
+              </div>
+              <div class="feed-comment">« Crémeux comme il faut, bien gratiné. Manquait juste un peu de sel. »</div>
+              <div class="feed-time">il y a 3h</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-avatar av5">🙋</div>
+            <div class="feed-content">
+              <div class="feed-top">
+                <span class="feed-user">emma_v</span>
+                <span class="feed-action">a noté</span>
+                <span class="feed-meal">Burger végétarien</span>
+                <span class="feed-stars">★★☆☆☆</span>
+              </div>
+              <div class="feed-comment">« Le steak de soja avait la consistance d'une semelle. Respect pour l'effort végé, mais il faut progresser. »</div>
+              <div class="feed-time">il y a 5h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-header">
+          <div class="section-title">Top repas <span>de l'année</span></div>
+          <a href="classement.html" class="section-link">Classement complet →</a>
+        </div>
+        <div class="top-list">
+          <div class="top-item">
+            <div class="top-rank">1</div>
+            <div class="top-emoji">🍖</div>
+            <div class="top-info"><div class="top-name">Steak haché frites</div><div class="top-meta">31 avis · vendredi</div></div>
+            <div class="top-score">4.8</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank">2</div>
+            <div class="top-emoji">🫕</div>
+            <div class="top-info"><div class="top-name">Lasagne bolognaise</div><div class="top-meta">12 avis · jeudi</div></div>
+            <div class="top-score">4.2</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank">3</div>
+            <div class="top-emoji">🍜</div>
+            <div class="top-info"><div class="top-name">Gratin dauphinois</div><div class="top-meta">14 avis · mercredi</div></div>
+            <div class="top-score">4.0</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank">4</div>
+            <div class="top-emoji">🍝</div>
+            <div class="top-info"><div class="top-name">Spaghetti carbonara</div><div class="top-meta">19 avis · lundi</div></div>
+            <div class="top-score">3.9</div>
+          </div>
+          <div class="top-item">
+            <div class="top-rank">5</div>
+            <div class="top-emoji">🍛</div>
+            <div class="top-info"><div class="top-name">Poulet rôti riz</div><div class="top-meta">22 avis · mardi</div></div>
+            <div class="top-score">3.7</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="review-cta">
+    <div class="review-cta-inner">
+      <div>
+        <div class="cta-label">📅 Aujourd'hui au menu</div>
+        <div class="cta-title">Tu as mangé à la cantine ?<br/>Donne ton avis.</div>
+        <div class="cta-sub">Chaque critique compte. Ta voix façonne le classement et aide tes camarades à savoir à quoi s'attendre demain.</div>
+      </div>
+      <div class="today-meal">
+        <div class="today-label">Menu du jour</div>
+        <span class="today-emoji">🍛</span>
+        <div class="today-name">Poulet rôti, riz créole</div>
+        <button class="rate-btn">⭐ Donner mon avis</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Meilleurs <span>critiques</span></div>
+      <a href="#" class="section-link">Tous les membres →</a>
+    </div>
+    <div class="reviewers-grid">
+      <div class="reviewer-card">
+        <div class="reviewer-avatar">👨‍🍳</div>
+        <div class="reviewer-name">Mathieu R.</div>
+        <div class="reviewer-handle">@mathieu_r</div>
+        <div class="reviewer-stats">
+          <div class="r-stat"><strong>48</strong><span>Avis</span></div>
+          <div class="r-stat"><strong>3.6</strong><span>Moy.</span></div>
+        </div>
+      </div>
+      <div class="reviewer-card">
+        <div class="reviewer-avatar">👩‍🎓</div>
+        <div class="reviewer-name">Chloé F.</div>
+        <div class="reviewer-handle">@chloe_fft</div>
+        <div class="reviewer-stats">
+          <div class="r-stat"><strong>39</strong><span>Avis</span></div>
+          <div class="r-stat"><strong>2.8</strong><span>Moy.</span></div>
+        </div>
+      </div>
+      <div class="reviewer-card">
+        <div class="reviewer-avatar">🧑‍💻</div>
+        <div class="reviewer-name">Lucas B.</div>
+        <div class="reviewer-handle">@lucas_bd</div>
+        <div class="reviewer-stats">
+          <div class="r-stat"><strong>35</strong><span>Avis</span></div>
+          <div class="r-stat"><strong>4.1</strong><span>Moy.</span></div>
+        </div>
+      </div>
+      <div class="reviewer-card">
+        <div class="reviewer-avatar">🙋‍♀️</div>
+        <div class="reviewer-name">Emma V.</div>
+        <div class="reviewer-handle">@emma_v</div>
+        <div class="reviewer-stats">
+          <div class="r-stat"><strong>28</strong><span>Avis</span></div>
+          <div class="r-stat"><strong>3.2</strong><span>Moy.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">🥡 Lunchboxd</div>
+      <ul class="footer-links">
+        <li><a href="#">À propos</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Confidentialité</a></li>
+        <li><a href="#">API</a></li>
+      </ul>
+      <div class="footer-copy">© 2026 Lunchboxd. Fait avec 🥄 — Lycée Sainte-Geneviève, 70 rue d'Assas, Paris 6e.</div>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+
+  <script>
+    // Chargement des stats depuis Firebase
+    async function loadStats() {
+      try {
+        const [allReviews, allUsers] = await Promise.all([
+          Auth.getAllReviews(),
+          Auth.getUsers()
+        ]);
+
+        // Plats uniques = reviews avec noms différents
+        const platsUniques = new Set(allReviews.map(r => r.mealName.toLowerCase())).size;
+        const totalCritiques = allReviews.length;
+        const membresActifs = allUsers.filter(u => (u.reviews || []).length > 0).length;
+        const noteMoyenne = totalCritiques > 0
+          ? (allReviews.reduce((s, r) => s + r.rating, 0) / totalCritiques).toFixed(1)
+          : '—';
+
+        // Meilleur plat (le mieux noté avec au moins 1 avis)
+        const mealMap = {};
+        allReviews.forEach(r => {
+          const k = r.mealName.toLowerCase();
+          if (!mealMap[k]) mealMap[k] = { name: r.mealName, total: 0, count: 0 };
+          mealMap[k].total += r.rating;
+          mealMap[k].count++;
+        });
+        const meilleur = Object.values(mealMap)
+          .sort((a, b) => (b.total / b.count) - (a.total / a.count))[0];
+
+        // Mise à jour du DOM
+        document.getElementById('statRepas').textContent     = platsUniques || '0';
+        document.getElementById('statCritiques').textContent = totalCritiques || '0';
+        document.getElementById('statMembres').textContent   = membresActifs || '0';
+        document.getElementById('statMoyenne').textContent   = noteMoyenne + (noteMoyenne !== '—' ? ' ★' : '');
+        document.getElementById('statMeilleur').textContent  = meilleur ? '🏆 ' + meilleur.name : '—';
+        document.getElementById('heroStatRepas').textContent = totalCritiques + ' repas';
+      } catch(e) {
+        console.warn('Erreur chargement stats', e);
+      }
+    }
+
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      // Stats Firebase
+      loadStats();
+      // Menu mobile auth
+      if (typeof Auth !== 'undefined') {
+        const session = Auth.getSession();
+        const authEl = document.getElementById('mobileMenuAuth');
+        if (authEl && session) {
+          authEl.innerHTML =
+            '<a href="profil.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">' + session.avatar + ' ' + session.pseudo + '</a>' +
+            '<button onclick="Auth.logout(); window.location.reload();" class="mobile-btn-ghost" style="cursor:pointer;">Déconnexion</button>';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

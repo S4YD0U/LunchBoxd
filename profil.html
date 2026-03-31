@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon profil — Lunchboxd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0f0c; --surface: #161712; --surface2: #1e1f1a;
+      --border: #2a2b25; --accent: #c8f542; --accent2: #f5a623;
+      --text: #e8e6dc; --muted: #7a7a6e; --red: #e84545;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1000; opacity: 0.5;
+    }
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(14,15,12,0.92); backdrop-filter: blur(12px); z-index: 100;
+    }
+    .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; color: var(--accent); text-decoration: none; }
+    .logo span { color: var(--text); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text); padding: 0.45rem 1.1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c; padding: 0.45rem 1.1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-primary:hover { background: #d9ff55; }
+
+    /* PROFILE HEADER */
+    .profile-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 3rem 2.5rem;
+      position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+      content: ''; position: absolute; top: -80px; right: -80px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(200,245,66,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .profile-header-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: flex-start; gap: 2rem;
+    }
+    .profile-avatar-big {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: var(--surface2); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem; flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(200,245,66,0.1);
+    }
+    .profile-info { flex: 1; }
+    .profile-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; font-weight: 900; letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+    .profile-handle { font-size: 0.8rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 0.8rem; }
+    .profile-joined { font-size: 0.72rem; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+    .profile-stats-row {
+      display: flex; gap: 2rem; margin-top: 1.2rem;
+    }
+    .pstat { display: flex; flex-direction: column; gap: 0.2rem; }
+    .pstat-num { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+    .pstat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+
+    .profile-actions { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-end; }
+
+    /* RATING CHART */
+    .rating-chart {
+      background: var(--surface2); border-radius: 6px;
+      padding: 1rem 1.2rem; margin-top: 1.2rem;
+      max-width: 260px;
+    }
+    .rating-chart-title { font-size: 0.65rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.7rem; }
+    .rating-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; }
+    .rating-row-label { font-size: 0.65rem; color: var(--accent2); width: 60px; text-align: right; flex-shrink: 0; letter-spacing: 0.05em; }
+    .rating-bar-track { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .rating-bar-fill { height: 100%; background: var(--accent2); border-radius: 3px; transition: width 1s ease; }
+    .rating-row-count { font-size: 0.62rem; color: var(--muted); font-family: 'DM Mono', monospace; width: 18px; }
+
+    /* MAIN CONTENT */
+    .main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2.5rem; display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem; }
+
+    /* REVIEWS LIST */
+    .reviews-section {}
+    .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; }
+    .section-title span { color: var(--accent); font-style: italic; }
+    .section-count { font-size: 0.72rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    .reviews-list { display: flex; flex-direction: column; gap: 1px; }
+
+    .review-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1.1rem 1.2rem; margin-bottom: 0.6rem;
+      transition: border-color 0.2s;
+    }
+    .review-item:hover { border-color: rgba(200,245,66,0.2); }
+
+    .review-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.4rem; gap: 1rem; }
+    .review-meal-name { font-size: 0.92rem; font-weight: 500; }
+    .review-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; flex-shrink: 0; }
+    .review-stars { color: var(--accent2); font-size: 0.75rem; letter-spacing: 0.05em; }
+    .review-date { font-size: 0.65rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .review-comment { font-size: 0.82rem; color: var(--muted); font-style: italic; line-height: 1.55; margin-top: 0.3rem; }
+    .review-comment::before { content: '« '; }
+    .review-comment::after { content: ' »'; }
+    .btn-read-more {
+      background: none; border: none; cursor: pointer;
+      color: var(--accent); font-size: 0.75rem; font-family: 'DM Sans', sans-serif;
+      font-weight: 500; padding: 0; margin-left: 0.3rem;
+      text-decoration: underline; transition: opacity 0.2s;
+    }
+    .btn-read-more:hover { opacity: 0.7; }
+
+    /* Actions toujours visibles */
+    .review-actions {
+      display: flex; gap: 0.4rem; margin-top: 0.7rem;
+      padding-top: 0.7rem; border-top: 1px solid var(--border);
+    }
+    .btn-edit-review, .btn-delete-review {
+      flex: 1; padding: 0.4rem 0.6rem; border-radius: 4px;
+      font-size: 0.75rem; font-family: 'DM Sans', sans-serif;
+      font-weight: 500; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+    }
+    .btn-edit-review {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+    }
+    .btn-edit-review:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-delete-review {
+      background: none; border: 1px solid rgba(232,69,69,0.25); color: var(--red);
+    }
+    .btn-delete-review:hover { background: rgba(232,69,69,0.08); border-color: var(--red); }
+
+    /* MODALE MODIFICATION */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.8rem; width: 100%; max-width: 480px;
+      position: relative;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif; font-size: 1.2rem;
+      font-weight: 700; margin-bottom: 1.2rem;
+    }
+    .modal-title span { color: var(--accent); font-style: italic; }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; color: var(--muted);
+      font-size: 1.2rem; cursor: pointer; padding: 0.3rem;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-actions { display: flex; gap: 0.7rem; margin-top: 1.2rem; }
+    .btn-modal-save {
+      flex: 1; padding: 0.7rem; background: var(--accent); border: none;
+      border-radius: 4px; color: #0e0f0c; font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-modal-save:hover { background: #d9ff55; }
+    .btn-modal-cancel {
+      flex: 1; padding: 0.7rem; background: none;
+      border: 1px solid var(--border); border-radius: 4px;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--text); color: var(--text); }
+
+    /* MODALE LISTE ABONNÉS/ABONNEMENTS */
+    .follow-list-overlay {
+      display: none; position: fixed; inset: 0; z-index: 600;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .follow-list-overlay.open { display: flex; }
+    .follow-list-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; width: 100%; max-width: 420px; max-height: 70vh;
+      display: flex; flex-direction: column; overflow: hidden; position: relative;
+    }
+    .follow-list-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .follow-list-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+    .follow-list-title span { color: var(--accent); font-style: italic; }
+    .follow-list-close { background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; padding: 0.2rem; }
+    .follow-list-close:hover { color: var(--text); }
+    .follow-list-body { overflow-y: auto; padding: 0.6rem 0; }
+    .follow-user-item {
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.8rem 1.4rem; transition: background 0.15s; text-decoration: none;
+      color: var(--text);
+    }
+    .follow-user-item:hover { background: var(--surface2); }
+    .follow-user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .follow-user-info { flex: 1; min-width: 0; }
+    .follow-user-pseudo { font-size: 0.88rem; font-weight: 500; }
+    .follow-user-handle { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .follow-user-stats { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 0.1rem; }
+    .follow-list-empty { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 0.85rem; }
+    /* Rendre les stats cliquables */
+    .pstat-clickable { cursor: pointer; }
+    .pstat-clickable:hover .pstat-num { color: #d9ff55; }
+    .pstat-clickable:hover .pstat-label { color: var(--text); }
+
+    .empty-state {
+      text-align: center; padding: 3rem 1rem;
+      background: var(--surface); border: 1px dashed var(--border); border-radius: 8px;
+    }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .empty-state-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .empty-state-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.2rem; }
+
+    /* SIDEBAR */
+    .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+    .widget { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.4rem; }
+    .widget-title { font-size: 0.65rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+
+    /* NOTE MEAL */
+    .rate-form {}
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
+    .form-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+    .form-input {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.6rem 0.8rem;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--muted); }
+    .form-textarea {
+      resize: vertical; min-height: 70px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.6rem 0.8rem;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+      outline: none; transition: border-color 0.2s; width: 100%; line-height: 1.5;
+    }
+    .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea::placeholder { color: var(--muted); }
+
+    .star-picker { display: flex; gap: 4px; margin-top: 0.3rem; }
+    .star-btn { font-size: 1.5rem; cursor: pointer; color: var(--border); transition: color 0.1s, transform 0.1s; user-select: none; }
+    .star-btn:hover, .star-btn.active { color: var(--accent2); transform: scale(1.15); }
+
+    .btn-rate {
+      width: 100%; padding: 0.7rem;
+      background: var(--accent); border: none; border-radius: 4px;
+      color: #0e0f0c; font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-rate:hover { background: #d9ff55; }
+
+    /* IMAGE UPLOAD */
+    .upload-zone {
+      border: 1.5px dashed var(--border); border-radius: 6px;
+      padding: 0.8rem; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .upload-zone:hover { border-color: var(--accent); background: rgba(200,245,66,0.03); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-zone-label { font-size: 0.75rem; color: var(--muted); pointer-events: none; }
+    .upload-zone-label span { color: var(--accent); }
+    .upload-preview {
+      width: 100%; max-height: 160px; object-fit: cover;
+      border-radius: 4px; margin-top: 0.5rem; display: none;
+    }
+    .upload-remove {
+      display: none; background: rgba(232,69,69,0.15); border: 1px solid rgba(232,69,69,0.3);
+      color: var(--red); font-size: 0.72rem; padding: 0.25rem 0.6rem;
+      border-radius: 3px; cursor: pointer; margin-top: 0.4rem; font-family: 'DM Sans', sans-serif;
+    }
+    /* Image dans les reviews */
+    .review-img {
+      width: 100%; max-height: 200px; object-fit: cover;
+      border-radius: 6px; margin-top: 0.7rem; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .review-img:hover { opacity: 0.9; }
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; padding: 1.5rem; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+    .lightbox-close { position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
+
+    .success-msg {
+      background: rgba(76,175,135,0.1); border: 1px solid rgba(76,175,135,0.25);
+      color: #4caf87; font-size: 0.78rem; padding: 0.6rem 0.9rem;
+      border-radius: 4px; margin-top: 0.6rem; display: none; text-align: center;
+    }
+    .success-msg.show { display: block; }
+
+    /* DANGER ZONE */
+    .danger-zone { border-color: rgba(232,69,69,0.2); }
+    .btn-danger {
+      width: 100%; padding: 0.6rem;
+      background: none; border: 1px solid rgba(232,69,69,0.3); border-radius: 4px;
+      color: var(--red); font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-danger:hover { background: rgba(232,69,69,0.08); border-color: var(--red); }
+
+    footer { border-top: 1px solid var(--border); padding: 1.5rem 2.5rem; background: var(--surface); margin-top: 2rem; }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+    .footer-logo span { color: var(--muted); }
+    .footer-copy { color: var(--border); font-size: 0.7rem; font-family: 'DM Mono', monospace; }
+
+    /* ── RESPONSIVE MOBILE ── */
+
+    /* HAMBURGER MENU */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.5rem 0.6rem; cursor: pointer;
+    }
+    .hamburger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.2s; }
+    .mobile-menu {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(14,15,12,0.97); z-index: 999;
+      flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a, .mobile-menu button {
+      color: var(--text); text-decoration: none; font-size: 1.4rem;
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      letter-spacing: -0.02em; transition: color 0.2s;
+      background: none; border: none; cursor: pointer;
+    }
+    .mobile-menu a:hover, .mobile-menu button:hover { color: var(--accent); }
+    .mobile-menu-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none; color: var(--muted); font-size: 1.5rem;
+      cursor: pointer; padding: 0.4rem;
+    }
+    .mobile-menu-divider { width: 60px; height: 1px; background: var(--border); }
+    .mobile-menu-auth { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; width: 80%; }
+    .mobile-btn-ghost {
+      display: block; width: 100%; text-align: center;
+      background: none; border: 1px solid var(--border); color: var(--text);
+      padding: 0.7rem 1.5rem; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .mobile-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .mobile-btn-primary {
+      display: block; width: 100%; text-align: center;
+      background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c;
+      padding: 0.7rem 1.5rem; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .mobile-btn-primary:hover { background: #d9ff55; }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE MOBILE
+    ═══════════════════════════════════════ */
+    @media (max-width: 768px) {
+      nav { padding: 0.9rem 1rem; }
+      .nav-links { display: none; }
+      .nav-actions { display: none; }
+      .hamburger { display: flex !important; }
+
+      .profile-header { padding: 1.5rem 1rem; }
+      .profile-header-inner { flex-direction: column; gap: 1rem; }
+      .profile-avatar-big { width: 64px; height: 64px; font-size: 2rem; }
+      .profile-name { font-size: 1.5rem; }
+      .profile-stats-row { gap: 1rem; flex-wrap: wrap; }
+      .pstat-num { font-size: 1.3rem; }
+      .rating-chart { max-width: 100%; }
+
+      .main { grid-template-columns: 1fr; padding: 1.2rem 1rem; gap: 1.2rem; }
+      .sidebar { order: -1; }
+
+      .review-item { padding: 0.9rem 1rem; }
+
+      footer { padding: 1.2rem 1rem; }
+      .footer-inner { flex-direction: column; gap: 0.8rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🥡 <span>Lunchboxd</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Repas</a></li>
+      <li><a href="critiques.html">Critiques</a></li>
+      <li><a href="classement.html">Classement</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="apropos.html">À propos</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions"></div>
+        
+      <button class="hamburger" onclick="openMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+    <a href="index.html" onclick="closeMobileMenu()">Repas</a>
+    <a href="critiques.html" onclick="closeMobileMenu()">Critiques</a>
+    <a href="classement.html" onclick="closeMobileMenu()">Classement</a>
+    <a href="menu.html" onclick="closeMobileMenu()">Menu</a>
+    <a href="apropos.html" onclick="closeMobileMenu()">À propos</a>
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-auth" id="mobileMenuAuth">
+      <a href="connexion.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">Connexion</a>
+      <a href="inscription.html" onclick="closeMobileMenu()" class="mobile-btn-primary">Créer un compte</a>
+    </div>
+  </div>
+
+
+  <!-- MODALE LISTE ABONNÉS/ABONNEMENTS -->
+  <div class="follow-list-overlay" id="followListOverlay" onclick="closeFollowList(event)">
+    <div class="follow-list-box">
+      <div class="follow-list-header">
+        <div class="follow-list-title" id="followListTitle">Abonnés</div>
+        <button class="follow-list-close" onclick="closeFollowList()">✕</button>
+      </div>
+      <div class="follow-list-body" id="followListBody">
+        <div class="follow-list-empty">Chargement…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE MODIFICATION -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+      <div class="modal-title">Modifier <span>mon avis</span></div>
+      <input type="hidden" id="editReviewId" />
+      <div class="form-group">
+        <label class="form-label">Nom du repas</label>
+        <input class="form-input" type="text" id="editMealName" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note</label>
+        <div class="star-picker" id="editStarPicker">
+          <span class="star-btn" data-val="1" onclick="setEditStar(1)">★</span>
+          <span class="star-btn" data-val="2" onclick="setEditStar(2)">★</span>
+          <span class="star-btn" data-val="3" onclick="setEditStar(3)">★</span>
+          <span class="star-btn" data-val="4" onclick="setEditStar(4)">★</span>
+          <span class="star-btn" data-val="5" onclick="setEditStar(5)">★</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Commentaire <span style="color:var(--muted);font-style:italic;">(optionnel)</span></label>
+        <textarea class="form-textarea" id="editComment" placeholder="En quelques mots honnêtes…" maxlength="300" oninput="updateCharCount('editComment','editCommentCount')"></textarea>
+        <span style="font-size:0.65rem;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;" id="editCommentCount">0/300</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photo <span style="color:var(--muted);font-style:italic;">(optionnel)</span></label>
+        <div class="upload-zone" id="editUploadZone">
+          <input type="file" id="editImage" accept="image/*" onchange="previewImage(this,'editUploadPreview','editUploadZone','editUploadRemove')" />
+          <div class="upload-zone-label">📷 Clique ou glisse une photo — <span>max 5 MB</span></div>
+        </div>
+        <img id="editUploadPreview" class="upload-preview" />
+        <button type="button" id="editUploadRemove" class="upload-remove" onclick="removeImage('editImage','editUploadPreview','editUploadRemove','editUploadZone')">✕ Supprimer la photo</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeEditModal()">Annuler</button>
+        <button class="btn-modal-save" onclick="saveEditReview()">Enregistrer →</button>
+      </div>
+    </div>
+  </div>
+  <div class="profile-header">
+    <div class="profile-header-inner">
+      <div class="profile-avatar-big" id="profileAvatar">🧔</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">Chargement…</div>
+        <div class="profile-handle" id="profileHandle">@…</div>
+        <div class="profile-joined" id="profileJoined"></div>
+        <div class="profile-stats-row">
+          <div class="pstat">
+            <span class="pstat-num" id="statRepas">0</span>
+            <span class="pstat-label">Repas notés</span>
+          </div>
+          <div class="pstat">
+            <span class="pstat-num" id="statMoy">—</span>
+            <span class="pstat-label">Note moyenne</span>
+          </div>
+          <div class="pstat">
+            <span class="pstat-num" id="statFav">—</span>
+            <span class="pstat-label">Plat favori</span>
+          </div>
+          <div class="pstat pstat-clickable" onclick="openFollowList('followers')">
+            <span class="pstat-num" id="statFollowers">0</span>
+            <span class="pstat-label">Abonnés</span>
+          </div>
+          <div class="pstat pstat-clickable" onclick="openFollowList('following')">
+            <span class="pstat-num" id="statFollowing">0</span>
+            <span class="pstat-label">Abonnements</span>
+          </div>
+        </div>
+        <!-- RATING DISTRIBUTION -->
+        <div class="rating-chart" id="ratingChart" style="display:none;">
+          <div class="rating-chart-title">Distribution des notes</div>
+          <div id="ratingBars"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- REVIEWS -->
+    <div class="reviews-section">
+      <div class="section-header">
+        <div class="section-title">Mes <span>avis</span></div>
+        <div class="section-count" id="reviewCount">0 avis</div>
+      </div>
+      <div class="reviews-list" id="reviewsList">
+        <div class="empty-state">
+          <div class="empty-state-icon">🍽️</div>
+          <div class="empty-state-title">Aucun avis pour l'instant</div>
+          <div class="empty-state-sub">Note ton premier repas pour commencer ton journal de cantine.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- NOTER UN REPAS -->
+      <div class="widget">
+        <div class="widget-title">⭐ Noter un repas</div>
+        <div class="rate-form">
+          <div class="form-group">
+            <label class="form-label">Nom du repas</label>
+            <input class="form-input" type="text" id="mealName" placeholder="Ex : Poulet basquaise" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ta note</label>
+            <div class="star-picker" id="starPicker">
+              <span class="star-btn" data-val="1" onclick="setStar(1)">★</span>
+              <span class="star-btn" data-val="2" onclick="setStar(2)">★</span>
+              <span class="star-btn" data-val="3" onclick="setStar(3)">★</span>
+              <span class="star-btn" data-val="4" onclick="setStar(4)">★</span>
+              <span class="star-btn" data-val="5" onclick="setStar(5)">★</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Commentaire <span style="color:var(--muted);font-style:italic;">(optionnel)</span></label>
+            <textarea class="form-textarea" id="mealComment" placeholder="En quelques mots honnêtes…" maxlength="300" oninput="updateCharCount('mealComment','mealCommentCount')"></textarea>
+            <span style="font-size:0.65rem;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;" id="mealCommentCount">0/300</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Photo <span style="color:var(--muted);font-style:italic;">(optionnel)</span></label>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="mealImage" accept="image/*" onchange="previewImage(this,'uploadPreview','uploadZone','uploadRemove')" />
+              <div class="upload-zone-label">📷 Clique ou glisse une photo — <span>max 5 MB</span></div>
+            </div>
+            <img id="uploadPreview" class="upload-preview" />
+            <button type="button" id="uploadRemove" class="upload-remove" onclick="removeImage('mealImage','uploadPreview','uploadRemove','uploadZone')">✕ Supprimer la photo</button>
+          </div>
+          <button class="btn-rate" onclick="submitReview()">Publier mon avis →</button>
+          <div class="success-msg" id="successMsg">✓ Avis publié !</div>
+        </div>
+      </div>
+
+      <!-- ACTIONS DU PROFIL -->
+      <div class="widget danger-zone">
+        <div class="widget-title">⚙️ Mon compte</div>
+        <button class="btn-danger" onclick="handleLogout()">Se déconnecter</button>
+        <p style="font-size:0.65rem;color:var(--muted);margin-top:0.8rem;line-height:1.5;">
+          Tes données sont stockées localement dans ton navigateur.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" src="" alt="" />
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <a class="footer-logo" href="index.html">🥡 <span>Lunchboxd</span></a>
+      <div class="footer-copy">© 2026 Lunchboxd. Fait avec 🥄 — Lycée Sainte-Geneviève, 70 rue d'Assas, Paris 6e.</div>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    // Guard: non connecté → connexion
+    if (!Auth.isLoggedIn()) {
+      window.location.href = 'connexion.html';
+    }
+
+    let currentRating = 0;
+
+    function setStar(val) {
+      currentRating = val;
+      document.querySelectorAll('#starPicker .star-btn').forEach((s, i) => {
+        s.classList.toggle('active', i < val);
+      });
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function starsStr(n) {
+      return '★'.repeat(n) + '☆'.repeat(5 - n);
+    }
+
+    function updateCharCount(textareaId, counterId) {
+      const len = document.getElementById(textareaId).value.length;
+      const el = document.getElementById(counterId);
+      el.textContent = len + '/300';
+      el.style.color = len >= 280 ? 'var(--accent2)' : 'var(--muted)';
+    }
+
+    const COMMENT_MAX = 120;
+    function renderComment(text, reviewId) {
+      if (!text) return '';
+      if (text.length <= COMMENT_MAX) return `<div class="review-comment">${text}</div>`;
+      return `
+        <div class="review-comment">
+          <span class="comment-short" id="short-${reviewId}">${text.slice(0, COMMENT_MAX)}…</span>
+          <span class="comment-full" id="full-${reviewId}" style="display:none;">${text}</span>
+          <button class="btn-read-more" onclick="toggleComment('${reviewId}')">Lire la suite</button>
+        </div>`;
+    }
+
+    function toggleComment(id) {
+      const short = document.getElementById('short-' + id);
+      const full  = document.getElementById('full-' + id);
+      const btn   = full.parentElement.querySelector('.btn-read-more');
+      const expanded = full.style.display !== 'none';
+      short.style.display = expanded ? 'inline' : 'none';
+      full.style.display  = expanded ? 'none'   : 'inline';
+      btn.textContent     = expanded ? 'Lire la suite' : 'Réduire';
+    }
+
+    async function renderProfile() {
+      const session = Auth.getSession();
+      if (!session) return;
+      const user = await Auth.getProfile(session.id);
+      if (!user) return;
+
+      document.getElementById('profileAvatar').textContent = user.avatar;
+      document.getElementById('profileName').textContent = user.pseudo;
+      document.getElementById('profileHandle').textContent = '@' + user.pseudo.toLowerCase().replace(/\s+/g, '_');
+      document.getElementById('profileJoined').textContent = 'Membre depuis le ' + formatDate(user.joinedAt);
+
+      const reviews = user.reviews || [];
+      document.getElementById('statRepas').textContent = reviews.length;
+      document.getElementById('reviewCount').textContent = reviews.length + ' avis';
+      document.getElementById('statFollowers').textContent = (user.followers || []).length;
+      document.getElementById('statFollowing').textContent = (user.following || []).length;
+
+      if (reviews.length > 0) {
+        const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+        document.getElementById('statMoy').textContent = avg + ' ★';
+
+        // Plat le mieux noté
+        const best = reviews.reduce((a, b) => a.rating >= b.rating ? a : b);
+        document.getElementById('statFav').textContent = best.mealName.length > 12 ? best.mealName.slice(0, 12) + '…' : best.mealName;
+
+        // Distribution
+        const dist = [0,0,0,0,0];
+        reviews.forEach(r => dist[r.rating - 1]++);
+        const max = Math.max(...dist, 1);
+        document.getElementById('ratingChart').style.display = 'block';
+        document.getElementById('ratingBars').innerHTML = [5,4,3,2,1].map(star => `
+          <div class="rating-row">
+            <span class="rating-row-label">${'★'.repeat(star)}</span>
+            <div class="rating-bar-track">
+              <div class="rating-bar-fill" style="width:${(dist[star-1]/max*100)}%"></div>
+            </div>
+            <span class="rating-row-count">${dist[star-1]}</span>
+          </div>
+        `).join('');
+      }
+
+      // Reviews list
+      const list = document.getElementById('reviewsList');
+      if (reviews.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🍽️</div>
+            <div class="empty-state-title">Aucun avis pour l'instant</div>
+            <div class="empty-state-sub">Note ton premier repas depuis le formulaire à droite.</div>
+          </div>`;
+      } else {
+        list.innerHTML = reviews.map(r => `
+          <div class="review-item" id="review-${r.id}">
+            <div class="review-top">
+              <div class="review-meal-name">${r.mealName}</div>
+              <div class="review-right">
+                <div class="review-stars">${starsStr(r.rating)}</div>
+                <div class="review-date">${formatDate(r.date)}</div>
+              </div>
+            </div>
+            ${r.imageUrl ? `
+              <button onclick="openLightbox('${r.imageUrl}')" style="display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(135deg,#0e1a1a,#152525);border:1px solid rgba(200,245,66,0.2);border-radius:8px;padding:0.4rem 0.7rem;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='rgba(200,245,66,0.2)'">
+                <span style="font-size:1.1rem;">📷</span>
+                <span style="font-size:0.55rem;color:var(--accent);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Voir la photo</span>
+              </button>` : ''}
+            ${renderComment(r.comment, r.id)}
+            <div class="review-actions">
+              <button class="btn-edit-review" onclick="openEditModal('${r.id}', '${r.mealName.replace(/'/g,"\\'")}', ${r.rating}, '${(r.comment||'').replace(/'/g,"\\'")}', '${r.imageUrl||''}')">
+                ✏️ Modifier
+              </button>
+              <button class="btn-delete-review" onclick="deleteReview('${r.id}')">
+                🗑 Supprimer
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    async function deleteReview(reviewId) {
+      if (!confirm('Supprimer cet avis ?')) return;
+      const result = await Auth.deleteReview(reviewId);
+      if (result.ok) renderProfile();
+    }
+
+    let editRating = 0;
+
+    function openEditModal(id, mealName, rating, comment, imageUrl) {
+      document.getElementById('editReviewId').value = id;
+      document.getElementById('editMealName').value = mealName;
+      document.getElementById('editComment').value = comment;
+      document.getElementById('editCommentCount').textContent = comment.length + '/300';
+      editRating = rating;
+      // Réinitialise l'upload
+      document.getElementById('editImage').value = '';
+      const prev = document.getElementById('editUploadPreview');
+      const rem = document.getElementById('editUploadRemove');
+      if (imageUrl) {
+        prev.src = imageUrl;
+        prev.style.display = 'block';
+        rem.style.display = 'inline-block';
+        rem.dataset.existingUrl = imageUrl;
+      } else {
+        prev.src = '';
+        prev.style.display = 'none';
+        rem.style.display = 'none';
+        rem.dataset.existingUrl = '';
+      }
+      document.querySelectorAll('#editStarPicker .star-btn').forEach((s, i) => {
+        s.classList.toggle('active', i < rating);
+      });
+      document.getElementById('editModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function setEditStar(val) {
+      editRating = val;
+      document.querySelectorAll('#editStarPicker .star-btn').forEach((s, i) => {
+        s.classList.toggle('active', i < val);
+      });
+    }
+
+    async function saveEditReview() {
+      const id = document.getElementById('editReviewId').value;
+      const mealName = document.getElementById('editMealName').value.trim();
+      const comment = document.getElementById('editComment').value.trim();
+      const imageFile = document.getElementById('editImage').files[0];
+      const existingUrl = document.getElementById('editUploadRemove').dataset.existingUrl || '';
+      const previewHidden = document.getElementById('editUploadPreview').style.display === 'none';
+
+      if (!mealName) { alert('Saisis le nom du repas.'); return; }
+      if (!editRating) { alert('Choisis une note.'); return; }
+
+      const btn = document.querySelector('.btn-modal-save');
+      btn.textContent = 'Enregistrement…';
+      btn.disabled = true;
+
+      let imageUrl = undefined;
+      if (imageFile) {
+        btn.textContent = 'Upload image…';
+        const up = await Auth.uploadImage(imageFile, id + '_edit');
+        if (!up.ok) { alert(up.error); btn.textContent = 'Enregistrer →'; btn.disabled = false; return; }
+        imageUrl = up.url;
+      } else if (previewHidden) {
+        // L'utilisateur a supprimé la photo
+        imageUrl = null;
+      } else if (existingUrl) {
+        // Garde l'image existante
+        imageUrl = existingUrl;
+      }
+
+      const result = await Auth.editReview(id, mealName, editRating, comment, imageUrl);
+      btn.textContent = 'Enregistrer →';
+      btn.disabled = false;
+      if (result.ok) { closeEditModal(); renderProfile(); }
+    }
+
+    // Fermer la modale en cliquant dehors
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+
+    async function submitReview() {
+      const name = document.getElementById('mealName').value.trim();
+      const comment = document.getElementById('mealComment').value.trim();
+      const imageFile = document.getElementById('mealImage').files[0];
+      const success = document.getElementById('successMsg');
+      const btn = document.querySelector('.btn-rate');
+
+      if (!name) { alert('Saisis le nom du repas.'); return; }
+      if (!currentRating) { alert('Choisis une note entre 1 et 5 étoiles.'); return; }
+
+      btn.textContent = 'Publication…';
+      btn.disabled = true;
+
+      // Upload image si présente
+      let imageUrl = null;
+      if (imageFile) {
+        btn.textContent = 'Upload image…';
+        const tempId = Date.now().toString();
+        const up = await Auth.uploadImage(imageFile, tempId);
+        if (!up.ok) { alert(up.error); btn.textContent = 'Publier mon avis →'; btn.disabled = false; return; }
+        imageUrl = up.url;
+        btn.textContent = 'Publication…';
+      }
+
+      const result = await Auth.addReview(name, currentRating, comment, imageUrl);
+      btn.textContent = 'Publier mon avis →';
+      btn.disabled = false;
+
+      if (result.ok) {
+        success.classList.add('show');
+        document.getElementById('mealName').value = '';
+        document.getElementById('mealComment').value = '';
+        document.getElementById('mealCommentCount').textContent = '0/300';
+        removeImage('mealImage', 'uploadPreview', 'uploadRemove', 'uploadZone');
+        currentRating = 0;
+        document.querySelectorAll('#starPicker .star-btn').forEach(s => s.classList.remove('active'));
+        setTimeout(() => success.classList.remove('show'), 3000);
+        renderProfile();
+      }
+    }
+
+    async function openFollowList(type) {
+      const overlay = document.getElementById('followListOverlay');
+      const title   = document.getElementById('followListTitle');
+      const body    = document.getElementById('followListBody');
+
+      title.innerHTML = type === 'followers'
+        ? 'Mes <span>abonnés</span>'
+        : 'Mes <span>abonnements</span>';
+      body.innerHTML = '<div class="follow-list-empty">Chargement…</div>';
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      const session = Auth.getSession();
+      const me = await Auth.getProfile(session.id);
+      const ids = type === 'followers' ? (me.followers || []) : (me.following || []);
+
+      if (ids.length === 0) {
+        body.innerHTML = `<div class="follow-list-empty">${type === 'followers' ? 'Personne ne te suit encore.' : 'Tu ne suis personne encore.'}</div>`;
+        return;
+      }
+
+      // Charge tous les profils en parallèle
+      const profiles = await Promise.all(ids.map(id => Auth.getProfile(id)));
+      const valid = profiles.filter(Boolean);
+
+      if (valid.length === 0) {
+        body.innerHTML = '<div class="follow-list-empty">Aucun profil trouvé.</div>';
+        return;
+      }
+
+      body.innerHTML = valid.map(u => `
+        <a class="follow-user-item" href="profil-public.html?id=${u.id}">
+          <div class="follow-user-avatar">${u.avatar}</div>
+          <div class="follow-user-info">
+            <div class="follow-user-pseudo">${u.pseudo}</div>
+            <div class="follow-user-handle">@${u.pseudo.toLowerCase().replace(/\s+/g,'_')}</div>
+            <div class="follow-user-stats">${(u.reviews||[]).length} critique${(u.reviews||[]).length > 1 ? 's' : ''}</div>
+          </div>
+          <span style="color:var(--muted);font-size:0.85rem;">→</span>
+        </a>`).join('');
+    }
+
+    function closeFollowList(e) {
+      if (e && e.target !== document.getElementById('followListOverlay')) return;
+      document.getElementById('followListOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function previewImage(input, previewId, zoneId, removeId) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const prev = document.getElementById(previewId);
+        prev.src = e.target.result;
+        prev.style.display = 'block';
+        document.getElementById(removeId).style.display = 'inline-block';
+        document.getElementById(zoneId).querySelector('.upload-zone-label').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage(inputId, previewId, removeId, zoneId) {
+      document.getElementById(inputId).value = '';
+      const prev = document.getElementById(previewId);
+      prev.src = ''; prev.style.display = 'none';
+      document.getElementById(removeId).style.display = 'none';
+      document.getElementById(removeId).dataset.existingUrl = '';
+      const label = document.getElementById(zoneId).querySelector('.upload-zone-label');
+      if (label) label.style.display = 'block';
+    }
+
+    function openLightbox(url) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function handleLogout() {
+      Auth.logout();
+      window.location.href = 'index.html';
+    }
+
+    // Init
+    renderProfile();
+
+    // Nav
+    const session = Auth.getSession();
+    const navActions = document.getElementById('navActions');
+    navActions.innerHTML = `
+      <a href="profil.html" style="display:flex;align-items:center;gap:0.5rem;background:var(--surface2);border:1px solid var(--accent);padding:0.35rem 0.9rem 0.35rem 0.5rem;border-radius:3px;text-decoration:none;">
+        <span style="font-size:1.1rem;">${session.avatar}</span>
+        <span style="font-size:0.82rem;font-weight:500;color:var(--accent);">${session.pseudo}</span>
+      </a>
+      <button class="btn-ghost" onclick="handleLogout()">Déconnexion</button>
+    `;
+  </script>
+
+  <script>
+    function openMobileMenu() {
+      document.getElementById('mobileMenu').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+      document.getElementById('mobileMenu').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    // Update mobile auth section based on login state
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof Auth !== 'undefined') {
+        const session = Auth.getSession();
+        const authEl = document.getElementById('mobileMenuAuth');
+        if (authEl && session) {
+          authEl.innerHTML =
+            '<a href="profil.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">' + session.avatar + ' ' + session.pseudo + '</a>' +
+            '<button onclick="Auth.logout(); window.location.reload();" class="mobile-btn-ghost" style="cursor:pointer;">Déconnexion</button>';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
