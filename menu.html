@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu de la semaine — Lunchboxd</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0e0f0c; --surface: #161712; --surface2: #1e1f1a;
+      --border: #2a2b25; --accent: #c8f542; --accent2: #f5a623;
+      --accent3: #e84545; --text: #e8e6dc; --muted: #7a7a6e; --card-bg: #1a1b16;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1000; opacity: 0.5;
+    }
+
+    /* NAV */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(14,15,12,0.92); backdrop-filter: blur(12px); z-index: 100; }
+    .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.02em; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; }
+    .logo span { color: var(--text); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text); padding: 0.45rem 1.1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c; padding: 0.45rem 1.1rem; border-radius: 3px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-primary:hover { background: #d9ff55; }
+
+    /* HERO */
+    .page-hero { padding: 3.5rem 2.5rem 2.5rem; border-bottom: 1px solid var(--border); background: var(--surface); position: relative; overflow: hidden; }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(200,245,66,0.05) 0%, transparent 70%); pointer-events: none; }
+    .page-hero-inner { max-width: 1200px; margin: 0 auto; }
+    .page-tag { display: inline-block; background: rgba(200,245,66,0.1); border: 1px solid rgba(200,245,66,0.25); color: var(--accent); font-size: 0.7rem; font-family: 'DM Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.28rem 0.7rem; border-radius: 2px; margin-bottom: 1rem; }
+    .page-hero h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    .page-hero h1 em { font-style: italic; color: var(--accent); }
+    .page-hero p { color: var(--muted); font-size: 0.95rem; line-height: 1.7; max-width: 520px; }
+
+    /* SEMAINE NAV */
+    .week-nav { max-width: 1200px; margin: 2.5rem auto 0; padding: 0 2.5rem; }
+    .week-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .week-label { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .week-range { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .week-btns { display: flex; gap: 0.5rem; }
+    .week-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 0.4rem 0.9rem; border-radius: 3px; font-family: 'DM Mono', monospace; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+    .week-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .week-btn.active { background: rgba(200,245,66,0.1); border-color: rgba(200,245,66,0.4); color: var(--accent); }
+
+    /* JOURS */
+    .days-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; padding: 0 2.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .day-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s; }
+    .day-card.today { border-color: rgba(200,245,66,0.4); }
+    .day-card.today .day-header { background: rgba(200,245,66,0.08); }
+    .day-header { padding: 0.85rem 1rem 0.7rem; border-bottom: 1px solid var(--border); }
+    .day-name { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; font-family: 'DM Mono', monospace; color: var(--muted); }
+    .day-date { font-size: 0.82rem; color: var(--text); margin-top: 0.15rem; }
+    .day-today-badge { display: inline-block; background: var(--accent); color: #0e0f0c; font-size: 0.58rem; font-weight: 700; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.15rem 0.5rem; border-radius: 2px; margin-top: 0.3rem; }
+    .day-body { padding: 0.9rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.7rem; min-height: 160px; }
+    .plat-block { }
+    .plat-type { font-size: 0.6rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.25rem; }
+    .plat-name { font-size: 0.82rem; font-weight: 500; color: var(--text); line-height: 1.3; }
+    .plat-emoji { font-size: 1.2rem; margin-bottom: 0.2rem; display: block; }
+    .plat-empty { font-size: 0.78rem; color: var(--border); font-style: italic; font-family: 'DM Mono', monospace; }
+    .day-vide { display: flex; align-items: center; justify-content: center; min-height: 120px; }
+    .day-vide-text { font-size: 0.75rem; color: var(--border); font-family: 'DM Mono', monospace; text-align: center; }
+
+    /* LEGENDE */
+    .legend { max-width: 1200px; margin: 0 auto; padding: 0 2.5rem 3rem; }
+    .legend-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.5rem; display: flex; align-items: flex-start; gap: 2rem; flex-wrap: wrap; }
+    .legend-title { font-size: 0.65rem; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem; }
+    .legend-items { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-dot.entree { background: #3a8c5e; }
+    .legend-dot.plat { background: var(--accent2); }
+    .legend-dot.dessert { background: #8c5aac; }
+    .legend-dot.accomp { background: #4a7db5; }
+
+    /* EMPTY STATE */
+    .empty-week { max-width: 1200px; margin: 3rem auto; padding: 0 2.5rem; text-align: center; }
+    .empty-week-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-week-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .empty-week-sub { color: var(--muted); font-size: 0.88rem; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; background: var(--surface); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.75rem; font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--border); font-size: 0.72rem; font-family: 'DM Mono', monospace; }
+
+    /* HAMBURGER */
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: 1px solid var(--border); border-radius: 4px; padding: 0.5rem 0.6rem; cursor: pointer; }
+    .hamburger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; }
+    .mobile-menu { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(14,15,12,0.97); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a, .mobile-menu button { color: var(--text); text-decoration: none; font-size: 1.4rem; font-family: 'Playfair Display', serif; font-weight: 700; letter-spacing: -0.02em; transition: color 0.2s; background: none; border: none; cursor: pointer; }
+    .mobile-menu a:hover, .mobile-menu button:hover { color: var(--accent); }
+    .mobile-menu-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; padding: 0.4rem; }
+    .mobile-menu-divider { width: 60px; height: 1px; background: var(--border); }
+    .mobile-menu-auth { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; width: 80%; }
+    .mobile-btn-ghost { display: block; width: 100%; text-align: center; background: none; border: 1px solid var(--border); color: var(--text); padding: 0.7rem 1.5rem; border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+    .mobile-btn-primary { display: block; width: 100%; text-align: center; background: var(--accent); border: 1px solid var(--accent); color: #0e0f0c; padding: 0.7rem 1.5rem; border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0.9rem 1rem; }
+      .nav-links { display: none; }
+      .nav-actions { display: none; }
+      .hamburger { display: flex !important; }
+      .page-hero { padding: 2rem 1rem 1.5rem; }
+      .page-hero h1 { font-size: 1.7rem; }
+      .week-nav { padding: 0 1rem; }
+      .week-header { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+      .days-grid { grid-template-columns: 1fr; padding: 0 1rem 2rem; }
+      .legend { padding: 0 1rem 2rem; }
+      footer { padding: 1.5rem 1rem; }
+      .footer-inner { flex-direction: column; gap: 0.8rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">🥡 <span>Lunchboxd</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Repas</a></li>
+      <li><a href="critiques.html">Critiques</a></li>
+      <li><a href="classement.html">Classement</a></li>
+      <li><a href="menu.html" class="active">Menu</a></li>
+      <li><a href="apropos.html">À propos</a></li>
+    </ul>
+    <div class="nav-actions" id="navActions">
+      <a class="btn-ghost" href="connexion.html">Connexion</a>
+      <a class="btn-primary" href="inscription.html">Créer un compte</a>
+    </div>
+    <button class="hamburger" onclick="openMobileMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+    <a href="index.html" onclick="closeMobileMenu()">Repas</a>
+    <a href="critiques.html" onclick="closeMobileMenu()">Critiques</a>
+    <a href="classement.html" onclick="closeMobileMenu()">Classement</a>
+    <a href="menu.html" onclick="closeMobileMenu()">Menu</a>
+    <a href="apropos.html" onclick="closeMobileMenu()">À propos</a>
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-auth" id="mobileMenuAuth">
+      <a href="connexion.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">Connexion</a>
+      <a href="inscription.html" onclick="closeMobileMenu()" class="mobile-btn-primary">Créer un compte</a>
+    </div>
+  </div>
+
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="page-tag">📅 Cantine · Lycée Sainte-Geneviève</div>
+      <h1>Menu de la <em>semaine</em></h1>
+      <p>Anticipe tes repas, prépare tes critiques. Le menu est mis à jour chaque semaine par l'administration.</p>
+    </div>
+  </div>
+
+  <div class="week-nav">
+    <div class="week-header">
+      <div>
+        <div class="week-label">Semaine en cours</div>
+        <div class="week-range" id="weekRange">—</div>
+      </div>
+      <div class="week-btns">
+        <button class="week-btn" id="btnPrevWeek" onclick="changeWeek(-1)">← Précédente</button>
+        <button class="week-btn active" id="btnCurWeek" onclick="changeWeek(0)">Cette semaine</button>
+        <button class="week-btn" id="btnNextWeek" onclick="changeWeek(1)">Suivante →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="days-grid" id="daysGrid">
+    <!-- généré par JS -->
+  </div>
+
+  <div class="legend">
+    <div class="legend-inner">
+      <div>
+        <div class="legend-title">Légende</div>
+        <div class="legend-items">
+          <div class="legend-item"><div class="legend-dot entree"></div> Entrée</div>
+          <div class="legend-item"><div class="legend-dot plat"></div> Plat principal</div>
+          <div class="legend-item"><div class="legend-dot accomp"></div> Accompagnement</div>
+          <div class="legend-item"><div class="legend-dot dessert"></div> Dessert</div>
+        </div>
+      </div>
+      <div style="color:var(--muted);font-size:0.78rem;line-height:1.6;">
+        Menu mis à jour par Ernest · <a href="admin.html" style="color:var(--accent);text-decoration:none;">Modifier le menu</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">🥡 Lunchboxd</div>
+      <ul class="footer-links">
+        <li><a href="apropos.html">À propos</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Confidentialité</a></li>
+      </ul>
+      <div class="footer-copy">© 2026 Lunchboxd. Fait avec 🥄 — Lycée Sainte-Geneviève, Paris 6e.</div>
+    </div>
+  </footer>
+
+  <script src="auth.js"></script>
+  <script>
+    const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+    const PLAT_TYPES = [
+      { key: 'entree',  label: 'Entrée',          emoji: '🥗' },
+      { key: 'plat',    label: 'Plat principal',   emoji: '🍽️' },
+      { key: 'accomp',  label: 'Accompagnement',   emoji: '🥦' },
+      { key: 'dessert', label: 'Dessert',           emoji: '🍮' },
+    ];
+
+    let currentWeekOffset = 0;
+    let menuData = {};
+
+    function getMondayOfWeek(offset) {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1) + (offset * 7);
+      const monday = new Date(now.setDate(diff));
+      monday.setHours(0,0,0,0);
+      return monday;
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    }
+
+    function getWeekKey(offset) {
+      const monday = getMondayOfWeek(offset);
+      return monday.toISOString().split('T')[0];
+    }
+
+    function isToday(date) {
+      const now = new Date();
+      return date.toDateString() === now.toDateString();
+    }
+
+    function renderWeek() {
+      const monday = getMondayOfWeek(currentWeekOffset);
+      const friday = new Date(monday); friday.setDate(friday.getDate() + 4);
+      document.getElementById('weekRange').textContent =
+        formatDate(monday) + ' — ' + formatDate(friday);
+
+      const weekKey = getWeekKey(currentWeekOffset);
+      const weekMenu = menuData[weekKey] || {};
+
+      const grid = document.getElementById('daysGrid');
+      grid.innerHTML = '';
+
+      JOURS.forEach((jour, i) => {
+        const date = new Date(monday); date.setDate(date.getDate() + i);
+        const dayKey = date.toISOString().split('T')[0];
+        const dayMenu = weekMenu[dayKey] || {};
+        const today = isToday(date);
+
+        const hasContent = PLAT_TYPES.some(pt => dayMenu[pt.key] && dayMenu[pt.key].trim());
+
+        const card = document.createElement('div');
+        card.className = 'day-card' + (today ? ' today' : '');
+
+        let bodyHtml = '';
+        if (hasContent) {
+          bodyHtml = PLAT_TYPES.map(pt => {
+            const val = dayMenu[pt.key] || '';
+            if (!val.trim()) return '';
+            return `<div class="plat-block">
+              <div class="plat-type">${pt.label}</div>
+              <div class="plat-name">${escHtml(val)}</div>
+            </div>`;
+          }).filter(Boolean).join('');
+        } else {
+          bodyHtml = `<div class="day-vide"><div class="day-vide-text">Menu non renseigné</div></div>`;
+        }
+
+        card.innerHTML = `
+          <div class="day-header">
+            <div class="day-name">${jour}</div>
+            <div class="day-date">${formatDate(date)}</div>
+            ${today ? '<div class="day-today-badge">Aujourd\'hui</div>' : ''}
+          </div>
+          <div class="day-body">${bodyHtml}</div>`;
+
+        grid.appendChild(card);
+      });
+
+      // Active buttons
+      document.getElementById('btnPrevWeek').classList.remove('active');
+      document.getElementById('btnCurWeek').classList.toggle('active', currentWeekOffset === 0);
+      document.getElementById('btnNextWeek').classList.remove('active');
+    }
+
+    function changeWeek(dir) {
+      if (dir === 0) currentWeekOffset = 0;
+      else currentWeekOffset += dir;
+      renderWeek();
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function openMobileMenu() { document.getElementById('mobileMenu').classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('open'); document.body.style.overflow = ''; }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Auth.updateNav();
+      try {
+        menuData = await Auth.getMenu();
+      } catch(e) { menuData = {}; }
+      renderWeek();
+
+      const session = Auth.getSession();
+      const authEl = document.getElementById('mobileMenuAuth');
+      if (authEl && session) {
+        authEl.innerHTML =
+          '<a href="profil.html" onclick="closeMobileMenu()" class="mobile-btn-ghost">' + session.avatar + ' ' + session.pseudo + '</a>' +
+          '<button onclick="Auth.logout(); window.location.reload();" class="mobile-btn-ghost" style="cursor:pointer;">Déconnexion</button>';
+      }
+    });
+  </script>
+</body>
+</html>
