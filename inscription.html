@@ -294,7 +294,12 @@
 
   <script src="auth.js"></script>
   <script>
-    if (Auth.isLoggedIn()) window.location.href = 'index.html';
+    // Attend que Firebase Auth soit prêt avant de vérifier la session
+    waitForFirebase().then(function(ready) {
+      if (ready && auth && auth.currentUser) {
+        window.location.href = 'index.html';
+      }
+    });
 
     let selectedAvatar = '🧔';
 
@@ -376,18 +381,13 @@
       btn.disabled = true;
       err.classList.remove('show');
 
-      const result = await Auth.register(pseudo, email, password);
+      const result = await Auth.register(pseudo, email, password, selectedAvatar);
       if (!result.ok) {
         err.textContent = result.error;
         err.classList.add('show');
         btn.textContent = 'Créer mon compte →';
         btn.disabled = false;
       } else {
-        const session = Auth.getSession();
-        if (session) {
-          session.avatar = selectedAvatar;
-          localStorage.setItem('lb_session', JSON.stringify(session));
-        }
         btn.textContent = '✓ Compte créé ! Bienvenue…';
         btn.style.background = '#4caf87';
         setTimeout(() => { window.location.href = 'profil.html'; }, 900);

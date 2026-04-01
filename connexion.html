@@ -285,8 +285,12 @@
 
   <script src="auth.js"></script>
   <script>
-    // Déjà connecté ? → profil
-    if (Auth.isLoggedIn()) window.location.href = 'profil.html';
+    // Attend que Firebase Auth soit prêt avant de vérifier l'état de connexion
+    waitForFirebase().then(function(ready) {
+      if (ready && auth && auth.currentUser) {
+        window.location.href = 'profil.html';
+      }
+    });
 
     // Pré-remplir si identifiants sauvegardés
     const saved = JSON.parse(localStorage.getItem('lb_remember') || 'null');
@@ -308,7 +312,6 @@
         return;
       }
 
-      // Affiche un état de chargement pendant que Firebase répond
       btn.textContent = 'Connexion…';
       btn.disabled = true;
       err.classList.remove('show');
@@ -332,7 +335,6 @@
       }
     }
 
-    // Entrée clavier
     document.addEventListener('keydown', e => {
       if (e.key === 'Enter') handleLogin();
     });
