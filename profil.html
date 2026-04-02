@@ -859,7 +859,12 @@
       const user = await Auth.getProfile(session.id);
       if (!user) return;
 
-      document.getElementById('profileAvatar').textContent = user.avatar;
+      const avatarEl = document.getElementById('profileAvatar');
+      if (user.avatar && user.avatar.startsWith('http')) {
+        avatarEl.innerHTML = '<img src="' + user.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+      } else {
+        avatarEl.textContent = user.avatar;
+      }
       document.getElementById('profileName').textContent = user.pseudo;
       document.getElementById('profileHandle').textContent = '@' + user.pseudo.toLowerCase().replace(/\s+/g, '_');
       document.getElementById('profileJoined').textContent = 'Membre depuis le ' + formatDate(user.joinedAt);
