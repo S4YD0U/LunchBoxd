@@ -845,7 +845,7 @@
             <div class="podium-slot" onclick="window.location.href='profil-public.html?id=${u.id}'" style="cursor:pointer;">
               <div class="podium-avatar-wrap">
                 ${isFirst ? '<div class="podium-crown">👑</div>' : ''}
-                <div class="podium-ava">${u.avatar}</div>
+                <div class="podium-ava">${u.avatar && u.avatar.startsWith('http') ? '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (u.avatar || '🧑')}</div>
                 <div class="podium-name">${u.pseudo}</div>
                 <div class="podium-handle">@${u.pseudo.toLowerCase().replace(/\s+/g,'_')}</div>
                 <div class="podium-stat-pill">${(u.reviews||[]).length} critique${(u.reviews||[]).length > 1 ? 's' : ''}</div>
@@ -871,7 +871,7 @@
             <div class="lb-row ${rankClass}" onclick="window.location.href='profil-public.html?id=${u.id}'" style="cursor:pointer;">
               <div class="lb-rank-cell">${medal}</div>
               <div class="lb-user-cell">
-                <div class="lb-avatar">${u.avatar}</div>
+                <div class="lb-avatar">${u.avatar && u.avatar.startsWith('http') ? '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (u.avatar || '🧑')}</div>
                 <div class="lb-user-info">
                   <div class="lb-username">${u.pseudo}</div>
                   <div class="lb-handle">@${u.pseudo.toLowerCase().replace(/\s+/g,'_')}</div>
