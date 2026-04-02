@@ -681,6 +681,15 @@ const Auth = {
     }).catch(function() { return { ok: false, error: 'Erreur réseau.' }; });
   },
 
+  /* ── HELPER : rendu avatar (emoji ou photo URL) ── */
+  renderAvatarHtml: function(avatar, size) {
+    size = size || '1.1rem';
+    if (avatar && avatar.startsWith('http')) {
+      return '<img src="' + avatar + '" style="width:' + size + ';height:' + size + ';object-fit:cover;border-radius:50%;display:block;" />';
+    }
+    return avatar || '🧑';
+  },
+
   /* ── NAV ── */
   updateNav: function() {
     var session = this.getSession();
@@ -693,7 +702,7 @@ const Auth = {
         actionsEl.innerHTML =
           adminLink +
           '<a href="profil.html" class="nav-profil-btn">' +
-            '<span class="nav-avatar">' + session.avatar + '</span>' +
+            '<span class="nav-avatar">' + self.renderAvatarHtml(session.avatar, '24px') + '</span>' +
             '<span class="nav-pseudo">' + session.pseudo + '</span>' +
           '</a>' +
           '<button class="btn-ghost" onclick="Auth.logout()">Déconnexion</button>';
@@ -942,7 +951,7 @@ const Auth = {
         matchedUsers.forEach(function(u) {
           var badges = Auth.renderBadges(u, {size:'small', max:2});
           html += '<a class="search-result-item" href="profil-public.html?id=' + u.id + '">' +
-            '<span class="search-result-avatar">' + (u.avatar || '🧑') + '</span>' +
+            '<span class="search-result-avatar">' + Auth.renderAvatarHtml(u.avatar || '🧑', '22px') + '</span>' +
             '<span><div class="search-result-name">' + u.pseudo + ' ' + badges + '</div>' +
             '<div class="search-result-sub">@' + u.pseudo.toLowerCase().replace(/\s+/g,'_') + ' · ' + (u.reviews||[]).length + ' avis</div></span></a>';
         });
