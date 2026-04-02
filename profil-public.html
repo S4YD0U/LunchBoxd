@@ -420,7 +420,12 @@
 
       // Rempli le header
       document.title = user.pseudo + ' — Lunchboxd';
-      document.getElementById('profileAvatar').textContent = user.avatar;
+      const avatarElPub = document.getElementById('profileAvatar');
+      if (user.avatar && user.avatar.startsWith('http')) {
+        avatarElPub.innerHTML = '<img src="' + user.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+      } else {
+        avatarElPub.textContent = user.avatar;
+      }
       document.getElementById('profileName').textContent = user.pseudo;
       document.getElementById('profileHandle').textContent = '@' + user.pseudo.toLowerCase().replace(/\s+/g, '_');
       document.getElementById('profileJoined').textContent = 'Membre depuis le ' + formatDate(user.joinedAt);
@@ -541,7 +546,7 @@
 
       body.innerHTML = valid.map(u => `
         <a class="follow-user-item" href="profil-public.html?id=${u.id}">
-          <div class="follow-user-avatar">${u.avatar}</div>
+          <div class="follow-user-avatar">${u.avatar && u.avatar.startsWith('http') ? '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (u.avatar || '🧑')}</div>
           <div class="follow-user-info">
             <div class="follow-user-pseudo">${u.pseudo}</div>
             <div class="follow-user-handle">@${u.pseudo.toLowerCase().replace(/\s+/g,'_')}</div>
