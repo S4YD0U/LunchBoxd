@@ -853,7 +853,7 @@
         const isOwn = session && session.id === rp.authorId;
         return `
           <div class="reply-item" id="reply-${rp.id}">
-            <a href="profil-public.html?id=${rp.authorId}" class="reply-avatar">${rp.authorAvatar}</a>
+            <a href="profil-public.html?id=${rp.authorId}" class="reply-avatar">${rp.authorAvatar && rp.authorAvatar.startsWith('http') ? '<img src="' + rp.authorAvatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (rp.authorAvatar || '🧑')}</a>
             <div class="reply-body">
               <div class="reply-header">
                 <a href="profil-public.html?id=${rp.authorId}" class="reply-pseudo">${rp.authorPseudo}</a>
@@ -867,7 +867,7 @@
 
       const formHtml = canReply ? `
         <div class="reply-form" id="reply-form-${r.id}">
-          <div class="reply-form-avatar">${session.avatar}</div>
+          <div class="reply-form-avatar">${session.avatar && session.avatar.startsWith('http') ? '<img src="' + session.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (session.avatar || '🧑')}</div>
           <textarea class="reply-input" id="reply-input-${r.id}" placeholder="Réponds à ${r.authorPseudo}…" maxlength="300" rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendReply('${r.authorId}','${r.id}')}"></textarea>
           <button class="btn-send-reply" onclick="sendReply('${r.authorId}','${r.id}')">Envoyer</button>
@@ -985,7 +985,7 @@
         return `
         <div class="review-card${isTop ? ' top-croced' : ''}" id="card-${r.id}">
           <div class="review-card-header">
-            <a href="profil-public.html?id=${r.authorId}" class="rc-avatar" style="text-decoration:none;">${r.authorAvatar}</a>
+            <a href="profil-public.html?id=${r.authorId}" class="rc-avatar" style="text-decoration:none;">${r.authorAvatar && r.authorAvatar.startsWith('http') ? '<img src="' + r.authorAvatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (r.authorAvatar || '🧑')}</a>
             <div class="rc-author-info">
               <a href="profil-public.html?id=${r.authorId}" class="rc-pseudo" style="text-decoration:none;color:var(--text);transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${r.authorPseudo}${isTop ? '<span class="top-croced-badge">🦷 Top croqué</span>' : ''}${r.authorData ? Auth.renderBadges(r.authorData, {size:'small', max:3}) : ''}</a>
               <div class="rc-handle">@${r.authorPseudo.toLowerCase().replace(/\s+/g, '_')}</div>
@@ -1085,7 +1085,7 @@
         ? '<p style="font-size:0.78rem;color:var(--muted);">Aucun membre.</p>'
         : memberActivity.map((u, i) => `
           <div class="member-item">
-            <div class="member-avatar-sm">${u.avatar}</div>
+            <div class="member-avatar-sm">${u.avatar && u.avatar.startsWith('http') ? '<img src="' + u.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" />' : (u.avatar || '🧑')}</div>
             <div class="member-info">
               <div class="member-pseudo">${u.pseudo}</div>
               <div class="member-count">${u.reviews.length} critique${u.reviews.length > 1 ? 's' : ''}</div>
