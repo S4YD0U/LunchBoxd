@@ -200,59 +200,52 @@ const Auth = {
   },
 
   /* ── INSCRIPTION ── */
-  register: function(pseudo, email, password, avatar) {
+  register: async function(pseudo, email, password, avatar) {
     avatar = avatar || '🧑';
-    if (pseudo.length < 3)   return Promise.resolve({ ok: false, error: 'Le pseudo doit faire au moins 3 caractères.' });
-    if (pseudo.length > 20)  return Promise.resolve({ ok: false, error: 'Le pseudo ne peut pas dépasser 20 caractères.' });
-    if (password.length < 6) return Promise.resolve({ ok: false, error: 'Le mot de passe doit faire au moins 6 caractères.' });
+    if (pseudo.length < 3)   return { ok: false, error: 'Le pseudo doit faire au moins 3 caractères.' };
+    if (pseudo.length > 20)  return { ok: false, error: 'Le pseudo ne peut pas dépasser 20 caractères.' };
+    if (password.length < 6) return { ok: false, error: 'Le mot de passe doit faire au moins 6 caractères.' };
 
-    return waitForFirebase().then(function(ready) {
-      if (!ready) {
-        return { ok: false, error: 'Impossible de joindre Firebase. Vérifie ta connexion.' };
-      }
+    const ready = await waitForFirebase();
+    if (!ready) return { ok: false, error: 'Impossible de joindre Firebase. Vérifie ta connexion.' };
 
+    try {
       // 1. Vérifie que le pseudo n'est pas déjà pris
-      return db.collection('users').where('pseudoLower', '==', pseudo.toLowerCase()).get()
-        .then(function(snap) {
-          if (!snap.empty) return { ok: false, error: 'Ce pseudo est déjà pris.' };
+      const snap = await db.collection('users').where('pseudoLower', '==', pseudo.toLowerCase()).get();
+      if (!snap.empty) return { ok: false, error: 'Ce pseudo est déjà pris.' };
 
-          // 2. Crée le compte Firebase Auth
-          return auth.createUserWithEmailAndPassword(email, password);
-        })
-        .then(function(result) {
-          if (result && result.ok === false) return result; // erreur pseudo
-          const firebaseUser = result.user;
-          const uid = firebaseUser.uid;
+      // 2. Crée le compte Firebase Auth
+      const result = await auth.createUserWithEmailAndPassword(email, password);
+      const firebaseUser = result.user;
+      const uid = firebaseUser.uid;
 
-          const userData = {
-            id:          uid,
-            pseudo:      pseudo,
-            pseudoLower: pseudo.toLowerCase(),
-            email:       email,
-            emailLower:  email.toLowerCase(),
-            avatar:      avatar,
-            joinedAt:    new Date().toISOString(),
-            reviews:     [],
-          };
+      const userData = {
+        id:          uid,
+        pseudo:      pseudo,
+        pseudoLower: pseudo.toLowerCase(),
+        email:       email,
+        emailLower:  email.toLowerCase(),
+        avatar:      avatar,
+        joinedAt:    new Date().toISOString(),
+        reviews:     [],
+      };
 
-          // 3. Crée le profil dans Firestore
-          return db.collection('users').doc(uid).set(userData)
-            .then(function() {
-              _cacheSession(userData);
-              return { ok: true, user: userData };
-            });
-        })
-        .catch(function(e) {
-          // Erreurs Firebase Auth avec messages en français
-          const msgs = {
-            'auth/email-already-in-use': 'Cet email est déjà utilisé.',
-            'auth/invalid-email':        'Adresse email invalide.',
-            'auth/weak-password':        'Mot de passe trop faible (min. 6 caractères).',
-            'auth/network-request-failed': 'Erreur réseau. Vérifie ta connexion.',
-          };
-          return { ok: false, error: msgs[e.code] || ('Erreur : ' + e.message) };
-        });
-    });
+      // 3. Crée le profil dans Firestore
+      await db.collection('users').doc(uid).set(userData);
+      _cacheSession(userData);
+      return { ok: true, user: userData };
+
+    } catch(e) {
+      // Erreurs Firebase Auth avec messages en français
+      const msgs = {
+        'auth/email-already-in-use':   'Cet email est déjà utilisé.',
+        'auth/invalid-email':          'Adresse email invalide.',
+        'auth/weak-password':          'Mot de passe trop faible (min. 6 caractères).',
+        'auth/network-request-failed': 'Erreur réseau. Vérifie ta connexion.',
+        'auth/operation-not-allowed':  'La connexion par email/mot de passe n\'est pas activée. Active-la dans la console Firebase → Authentication → Sign-in method.',
+      };
+      return { ok: false, error: msgs[e.code] || ('Erreur : ' + e.message) };
+    }
   },
 
   /* ── CONNEXION (par pseudo OU email) ── */
